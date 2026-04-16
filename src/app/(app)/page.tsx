@@ -9,8 +9,6 @@ import { formatDate, getDaysAgo, getMonthsFromNow } from '@/lib/date'
 import { CheckCircle2, Circle, ChevronRight, Sparkles, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 
-// ── 貯金残高ロジック ──────────────────────────────────
-
 type HealthStatus = 'green' | 'yellow' | 'red'
 
 function getCoreValueHealth(layer: DesignLayer | null): { status: HealthStatus; label: string } {
@@ -42,14 +40,11 @@ const healthColors: Record<HealthStatus, string> = {
   yellow: '#F5A623',
   red: '#E5484D',
 }
-
 const healthBg: Record<HealthStatus, string> = {
   green: 'rgba(48,164,108,0.08)',
   yellow: 'rgba(245,166,35,0.08)',
   red: 'rgba(229,72,77,0.08)',
 }
-
-// ── Component ─────────────────────────────────────────
 
 export default function DashboardPage() {
   const [focusTasks, setFocusTasks] = useState<Task[]>([])
@@ -75,6 +70,8 @@ export default function DashboardPage() {
       setFocusTasks(focus)
       setStalestTask(stale)
       setLayers({ core_value: cv, roadmap: rm, spec_design: sd })
+    } catch (e) {
+      console.error(e)
     } finally {
       setLoading(false)
     }
@@ -92,7 +89,7 @@ export default function DashboardPage() {
     }
   }
 
-  const handleFetchAiSuggestion = async () => {
+  const handleFetchAiSuggestion = useCallback(async () => {
     if (!stalestTask) return
     setLoadingAi(true)
     try {
@@ -112,7 +109,7 @@ export default function DashboardPage() {
     } finally {
       setLoadingAi(false)
     }
-  }
+  }, [stalestTask])
 
   useEffect(() => {
     if (stalestTask) handleFetchAiSuggestion()
@@ -125,23 +122,22 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full" style={{ color: '#6B6B6B' }}>
-        <div className="text-sm">読み込み中...</div>
+      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
+        読み込み中...
       </div>
     )
   }
 
   return (
     <div className="px-8 py-8 max-w-5xl">
-      {/* ページタイトル */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold" style={{ color: '#F0F0F0' }}>ダッシュボード</h2>
-        <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>設計貯金の状態を確認する</p>
+        <h2 className="text-lg font-semibold text-foreground">ダッシュボード</h2>
+        <p className="text-xs mt-1 text-muted-foreground">設計貯金の状態を確認する</p>
       </div>
 
       {/* 設計貯金残高 */}
       <section className="mb-8">
-        <h3 className="text-xs font-medium mb-3 uppercase tracking-wider" style={{ color: '#6B6B6B' }}>
+        <h3 className="text-xs font-medium mb-3 uppercase tracking-wider text-muted-foreground">
           設計貯金残高
         </h3>
         <div className="grid grid-cols-3 gap-4">
@@ -153,16 +149,10 @@ export default function DashboardPage() {
             <Link
               key={title}
               href={href}
-              className="block rounded-lg p-5 transition-colors"
-              style={{
-                background: '#1A1A1A',
-                border: `1px solid #2A2A2A`,
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = '#1E1E1E')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = '#1A1A1A')}
+              className="block rounded-lg p-5 transition-colors bg-card border border-border hover:bg-accent/30"
             >
               <div className="flex items-start justify-between mb-3">
-                <span className="text-xs font-medium" style={{ color: '#F0F0F0' }}>{title}</span>
+                <span className="text-xs font-medium text-foreground">{title}</span>
                 <span
                   className="text-xs px-2 py-0.5 rounded-full font-medium"
                   style={{
@@ -173,8 +163,8 @@ export default function DashboardPage() {
                   {health.status === 'green' ? '健康' : health.status === 'yellow' ? '注意' : '要更新'}
                 </span>
               </div>
-              <p className="text-xs" style={{ color: '#6B6B6B' }}>{health.label}</p>
-              <p className="text-xs mt-1" style={{ color: '#3A3A3A' }}>{sub}</p>
+              <p className="text-xs text-muted-foreground">{health.label}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--border)' }}>{sub}</p>
             </Link>
           ))}
         </div>
@@ -183,32 +173,22 @@ export default function DashboardPage() {
       {/* 今週のフォーカス */}
       <section className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-medium uppercase tracking-wider" style={{ color: '#6B6B6B' }}>
+          <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             今週のフォーカス
           </h3>
           <Link
             href="/tasks"
-            className="text-xs flex items-center gap-1 transition-colors"
-            style={{ color: '#6B6B6B' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#6B6B6B')}
+            className="text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
           >
             フォーカスを編集 <ChevronRight style={{ width: 12, height: 12 }} />
           </Link>
         </div>
 
-        <div
-          className="rounded-lg overflow-hidden"
-          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
-        >
+        <div className="rounded-lg overflow-hidden bg-card border border-border">
           {focusTasks.length === 0 ? (
             <div className="px-5 py-6 text-center">
-              <p className="text-xs" style={{ color: '#6B6B6B' }}>フォーカス中のタスクはありません</p>
-              <Link
-                href="/tasks"
-                className="inline-block mt-2 text-xs"
-                style={{ color: '#5E6AD2' }}
-              >
+              <p className="text-xs text-muted-foreground">フォーカス中のタスクはありません</p>
+              <Link href="/tasks" className="inline-block mt-2 text-xs" style={{ color: '#5E6AD2' }}>
                 タスク一覧からフォーカスを設定する
               </Link>
             </div>
@@ -217,36 +197,27 @@ export default function DashboardPage() {
               <div
                 key={task.id}
                 className="flex items-center gap-3 px-5 py-3.5"
-                style={{
-                  borderBottom: i < focusTasks.length - 1 ? '1px solid #2A2A2A' : undefined,
-                }}
+                style={{ borderBottom: i < focusTasks.length - 1 ? '1px solid var(--border)' : undefined }}
               >
                 <button
                   onClick={() => handleCompleteTask(task)}
-                  className="flex-shrink-0 transition-colors"
-                  style={{ color: '#6B6B6B' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#30A46C')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#6B6B6B')}
+                  className="flex-shrink-0 text-muted-foreground hover:text-green-500 transition-colors"
                 >
                   {task.status === 'done'
                     ? <CheckCircle2 style={{ width: 16, height: 16, color: '#30A46C' }} />
                     : <Circle style={{ width: 16, height: 16 }} />
                   }
                 </button>
-                <Link
-                  href={`/tasks/${task.id}`}
-                  className="flex-1 min-w-0"
-                >
-                  <span className="text-sm block truncate" style={{ color: '#F0F0F0' }}>
-                    {task.title}
-                  </span>
+                <Link href={`/tasks/${task.id}`} className="flex-1 min-w-0">
+                  <span className="text-sm block truncate text-foreground">{task.title}</span>
                 </Link>
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <TaskStatusBadge status={task.status} />
+                  <StatusDot
+                    variant={task.status === 'done' ? 'green' : task.status === 'in_progress' ? 'blue' : 'gray'}
+                    label={task.status === 'done' ? '完了' : task.status === 'in_progress' ? '進行中' : '未着手'}
+                  />
                   {task.due_date && (
-                    <span className="text-xs" style={{ color: '#6B6B6B' }}>
-                      {formatDate(task.due_date)}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{formatDate(task.due_date)}</span>
                   )}
                 </div>
               </div>
@@ -259,38 +230,25 @@ export default function DashboardPage() {
       {stalestTask && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider flex items-center gap-2" style={{ color: '#6B6B6B' }}>
+            <h3 className="text-xs font-medium uppercase tracking-wider flex items-center gap-2 text-muted-foreground">
               <Sparkles style={{ width: 12, height: 12, color: '#5E6AD2' }} />
               AIサジェスト
             </h3>
             <button
               onClick={handleFetchAiSuggestion}
               disabled={loadingAi}
-              className="text-xs flex items-center gap-1 transition-colors disabled:opacity-50"
-              style={{ color: '#6B6B6B' }}
-              onMouseEnter={(e) => !loadingAi && (e.currentTarget.style.color = '#F0F0F0')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#6B6B6B')}
+              className="text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
             >
-              <RefreshCw
-                style={{ width: 12, height: 12 }}
-                className={loadingAi ? 'animate-spin' : ''}
-              />
+              <RefreshCw style={{ width: 12, height: 12 }} className={loadingAi ? 'animate-spin' : ''} />
               再取得
             </button>
           </div>
 
-          <div
-            className="rounded-lg p-5"
-            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
-          >
+          <div className="rounded-lg p-5 bg-card border border-border">
             <div className="flex items-start justify-between mb-3">
               <div>
-                <p className="text-xs font-medium" style={{ color: '#F0F0F0' }}>
-                  {stalestTask.title}
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: '#6B6B6B' }}>
-                  最も長く止まっているタスク
-                </p>
+                <p className="text-xs font-medium text-foreground">{stalestTask.title}</p>
+                <p className="text-xs mt-0.5 text-muted-foreground">最も長く止まっているタスク</p>
               </div>
               <Link
                 href={`/tasks/${stalestTask.id}`}
@@ -302,20 +260,13 @@ export default function DashboardPage() {
             </div>
 
             {loadingAi ? (
-              <div className="mt-3">
-                <div className="h-3 rounded" style={{ background: '#2A2A2A', width: '60%' }} />
-                <div className="h-3 rounded mt-2" style={{ background: '#2A2A2A', width: '80%' }} />
-                <div className="h-3 rounded mt-2" style={{ background: '#2A2A2A', width: '40%' }} />
+              <div className="mt-3 space-y-2">
+                {[60, 80, 40].map((w, i) => (
+                  <div key={i} className="h-3 rounded bg-border animate-pulse" style={{ width: `${w}%` }} />
+                ))}
               </div>
             ) : aiSuggestion ? (
-              <div
-                className="mt-3 text-xs leading-relaxed whitespace-pre-wrap rounded p-3"
-                style={{
-                  color: '#B0B0B0',
-                  background: '#141414',
-                  border: '1px solid #2A2A2A',
-                }}
-              >
+              <div className="mt-3 text-xs leading-relaxed whitespace-pre-wrap rounded p-3 bg-muted text-muted-foreground border border-border">
                 {aiSuggestion}
               </div>
             ) : null}
@@ -324,14 +275,4 @@ export default function DashboardPage() {
       )}
     </div>
   )
-}
-
-function TaskStatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; color: string }> = {
-    pending: { label: '未着手', color: '#6B6B6B' },
-    in_progress: { label: '進行中', color: '#5E6AD2' },
-    done: { label: '完了', color: '#30A46C' },
-  }
-  const s = map[status] ?? map.pending
-  return <StatusDot variant={status === 'done' ? 'green' : status === 'in_progress' ? 'blue' : 'gray'} label={s.label} />
 }

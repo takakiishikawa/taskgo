@@ -2,9 +2,19 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, ListTodo, Layers, LogOut } from 'lucide-react'
+import {
+  LayoutDashboard,
+  ListTodo,
+  Layers,
+  LogOut,
+  Sun,
+  Moon,
+  Info,
+  Zap,
+} from 'lucide-react'
 
 const navItems = [
   { href: '/', label: 'ダッシュボード', icon: LayoutDashboard },
@@ -15,6 +25,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -23,23 +34,27 @@ export function Sidebar() {
     router.refresh()
   }
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
+  }
+
   return (
     <aside
       className="flex-shrink-0 flex flex-col min-h-screen"
-      style={{ width: 220, background: '#111111', borderRight: '1px solid #2A2A2A' }}
+      style={{ width: 220 }}
     >
       {/* Logo */}
-      <div className="px-5 py-5" style={{ borderBottom: '1px solid #2A2A2A' }}>
-        <div className="flex items-center gap-2">
+      <div className="px-4 py-4 border-b border-border">
+        <div className="flex items-center gap-2.5">
           <div
-            className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold text-white"
-            style={{ background: '#5E6AD2' }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #5E6AD2 0%, #7B87E3 100%)' }}
           >
-            T
+            <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-sm font-semibold" style={{ color: '#F0F0F0' }}>
-            taskgo
-          </span>
+          <div className="leading-none">
+            <span className="text-sm font-semibold text-foreground">TaskGo</span>
+          </div>
         </div>
       </div>
 
@@ -55,21 +70,13 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-2.5 px-3 py-2 rounded text-xs font-medium transition-colors',
                 isActive
-                  ? 'text-white'
-                  : 'hover:bg-[#1E1E1E]'
+                  ? 'bg-accent text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
               )}
-              style={{
-                color: isActive ? '#F0F0F0' : '#6B6B6B',
-                background: isActive ? '#1E1E1E' : undefined,
-              }}
             >
               <Icon
-                className="flex-shrink-0"
-                style={{
-                  width: 14,
-                  height: 14,
-                  color: isActive ? '#5E6AD2' : '#6B6B6B',
-                }}
+                className={cn('flex-shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')}
+                style={{ width: 14, height: 14 }}
               />
               {item.label}
             </Link>
@@ -78,11 +85,37 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-2 py-3" style={{ borderTop: '1px solid #2A2A2A' }}>
+      <div className="px-2 py-3 border-t border-border space-y-0.5">
+        {/* About */}
+        <Link
+          href="/about"
+          className={cn(
+            'flex items-center gap-2.5 px-3 py-2 rounded text-xs w-full transition-colors',
+            pathname === '/about'
+              ? 'bg-accent text-foreground'
+              : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
+          )}
+        >
+          <Info style={{ width: 14, height: 14 }} className="flex-shrink-0" />
+          コンセプト・使い方
+        </Link>
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-2.5 px-3 py-2 rounded text-xs w-full transition-colors text-muted-foreground hover:text-foreground hover:bg-accent/60"
+        >
+          {theme === 'dark'
+            ? <Sun style={{ width: 14, height: 14 }} className="flex-shrink-0" />
+            : <Moon style={{ width: 14, height: 14 }} className="flex-shrink-0" />
+          }
+          {theme === 'dark' ? 'ライトモード' : 'ダークモード'}
+        </button>
+
+        {/* Sign out */}
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2.5 px-3 py-2 rounded text-xs w-full transition-colors hover:bg-[#1E1E1E]"
-          style={{ color: '#6B6B6B' }}
+          className="flex items-center gap-2.5 px-3 py-2 rounded text-xs w-full transition-colors text-muted-foreground hover:text-foreground hover:bg-accent/60"
         >
           <LogOut style={{ width: 14, height: 14 }} className="flex-shrink-0" />
           ログアウト

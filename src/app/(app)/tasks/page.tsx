@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { DatePicker } from '@/components/ui/date-picker'
 
 const LAYER_LABELS: Record<LayerType, string> = {
   core_value: 'コアバリュー',
@@ -47,7 +48,7 @@ export default function TasksPage() {
     title: '',
     description: '',
     layer_type: 'spec_design' as LayerType,
-    due_date: '',
+    due_date: undefined as string | undefined,
   })
   const [creating, setCreating] = useState(false)
 
@@ -55,6 +56,9 @@ export default function TasksPage() {
     try {
       const data = await getTasks()
       setTasks(data)
+    } catch (e) {
+      console.error(e)
+      toast.error('タスクの読み込みに失敗しました')
     } finally {
       setLoading(false)
     }
@@ -80,7 +84,8 @@ export default function TasksPage() {
     try {
       const updated = await updateTask(task.id, { is_focus: !task.is_focus })
       setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)))
-    } catch {
+    } catch (e) {
+      console.error(e)
       toast.error('更新に失敗しました')
     }
   }
@@ -91,7 +96,8 @@ export default function TasksPage() {
       await deleteTask(task.id)
       setTasks((prev) => prev.filter((t) => t.id !== task.id))
       toast.success('削除しました')
-    } catch {
+    } catch (e) {
+      console.error(e)
       toast.error('削除に失敗しました')
     }
   }
@@ -108,10 +114,11 @@ export default function TasksPage() {
       })
       setTasks((prev) => [task, ...prev])
       setCreateOpen(false)
-      setForm({ title: '', description: '', layer_type: 'spec_design', due_date: '' })
+      setForm({ title: '', description: '', layer_type: 'spec_design', due_date: undefined })
       toast.success('タスクを作成しました')
-    } catch {
-      toast.error('作成に失敗しました')
+    } catch (e) {
+      console.error(e)
+      toast.error(e instanceof Error ? e.message : '作成に失敗しました')
     } finally {
       setCreating(false)
     }
@@ -119,8 +126,8 @@ export default function TasksPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full" style={{ color: '#6B6B6B' }}>
-        <div className="text-sm">読み込み中...</div>
+      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
+        読み込み中...
       </div>
     )
   }
@@ -130,8 +137,8 @@ export default function TasksPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-lg font-semibold" style={{ color: '#F0F0F0' }}>タスク</h2>
-          <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>設計タスクを管理する</p>
+          <h2 className="text-lg font-semibold text-foreground">タスク</h2>
+          <p className="text-xs mt-1 text-muted-foreground">設計タスクを管理する</p>
         </div>
         <button
           onClick={() => setCreateOpen(true)}
@@ -153,8 +160,8 @@ export default function TasksPage() {
             onClick={() => setStatusFilter(s)}
             className="text-xs px-3 py-1.5 rounded transition-colors"
             style={{
-              background: statusFilter === s ? '#2A2A2A' : 'transparent',
-              color: statusFilter === s ? '#F0F0F0' : '#6B6B6B',
+              background: statusFilter === s ? 'var(--accent)' : 'transparent',
+              color: statusFilter === s ? 'var(--foreground)' : 'var(--muted-foreground)',
             }}
           >
             {s === 'all' ? 'すべて' : STATUS_CONFIG[s].label}
@@ -170,21 +177,15 @@ export default function TasksPage() {
           return (
             <div key={layer}>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-medium uppercase tracking-wider" style={{ color: '#6B6B6B' }}>
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {LAYER_LABELS[layer]}
                 </span>
-                <span
-                  className="text-xs px-1.5 py-0.5 rounded"
-                  style={{ background: '#2A2A2A', color: '#6B6B6B' }}
-                >
+                <span className="text-xs px-1.5 py-0.5 rounded bg-accent text-muted-foreground">
                   {layerTasks.length}
                 </span>
               </div>
 
-              <div
-                className="rounded-lg overflow-hidden"
-                style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
-              >
+              <div className="rounded-lg overflow-hidden border border-border bg-card">
                 {layerTasks.map((task, i) => (
                   <TaskRow
                     key={task.id}
@@ -193,8 +194,13 @@ export default function TasksPage() {
                     onToggleFocus={handleToggleFocus}
                     onDelete={handleDelete}
                     onStatusChange={async (status) => {
-                      const updated = await updateTask(task.id, { status })
-                      setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)))
+                      try {
+                        const updated = await updateTask(task.id, { status })
+                        setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)))
+                      } catch (e) {
+                        console.error(e)
+                        toast.error('更新に失敗しました')
+                      }
                     }}
                   />
                 ))}
@@ -202,59 +208,45 @@ export default function TasksPage() {
             </div>
           )
         })}
+
+        {filteredTasks.length === 0 && (
+          <div className="rounded-lg border border-border bg-card px-5 py-10 text-center">
+            <p className="text-xs text-muted-foreground">タスクがありません</p>
+          </div>
+        )}
       </div>
 
       {/* Create dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent
-          style={{
-            background: '#1A1A1A',
-            border: '1px solid #2A2A2A',
-            color: '#F0F0F0',
-          }}
-        >
+        <DialogContent className="bg-card border-border">
           <DialogHeader>
-            <DialogTitle style={{ color: '#F0F0F0', fontSize: 14 }}>新規タスク</DialogTitle>
+            <DialogTitle className="text-foreground text-sm">新規タスク</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
-              <label className="text-xs block mb-1.5" style={{ color: '#6B6B6B' }}>タイトル *</label>
+              <label className="text-xs block mb-1.5 text-muted-foreground">タイトル *</label>
               <input
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                 placeholder="タスクのタイトルを入力"
-                className="w-full text-sm px-3 py-2 rounded outline-none transition-colors"
-                style={{
-                  background: '#141414',
-                  border: '1px solid #2A2A2A',
-                  color: '#F0F0F0',
-                }}
-                onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-                onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
+                className="w-full text-sm px-3 py-2 rounded outline-none transition-colors bg-input border border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
                 autoFocus
               />
             </div>
 
             <div>
-              <label className="text-xs block mb-1.5" style={{ color: '#6B6B6B' }}>レイヤー</label>
+              <label className="text-xs block mb-1.5 text-muted-foreground">レイヤー</label>
               <Select
                 value={form.layer_type}
                 onValueChange={(v) => setForm((f) => ({ ...f, layer_type: v as LayerType }))}
               >
-                <SelectTrigger
-                  className="text-sm"
-                  style={{
-                    background: '#141414',
-                    border: '1px solid #2A2A2A',
-                    color: '#F0F0F0',
-                  }}
-                >
+                <SelectTrigger className="text-sm bg-input border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+                <SelectContent className="bg-popover border-border">
                   {LAYER_ORDER.map((l) => (
-                    <SelectItem key={l} value={l} style={{ color: '#F0F0F0', fontSize: 13 }}>
+                    <SelectItem key={l} value={l} className="text-foreground text-xs">
                       {LAYER_LABELS[l]}
                     </SelectItem>
                   ))}
@@ -263,48 +255,28 @@ export default function TasksPage() {
             </div>
 
             <div>
-              <label className="text-xs block mb-1.5" style={{ color: '#6B6B6B' }}>期日</label>
-              <input
-                type="date"
+              <label className="text-xs block mb-1.5 text-muted-foreground">期日</label>
+              <DatePicker
                 value={form.due_date}
-                onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))}
-                className="w-full text-sm px-3 py-2 rounded outline-none"
-                style={{
-                  background: '#141414',
-                  border: '1px solid #2A2A2A',
-                  color: '#F0F0F0',
-                  colorScheme: 'dark',
-                }}
-                onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-                onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
+                onChange={(v) => setForm((f) => ({ ...f, due_date: v }))}
               />
             </div>
 
             <div>
-              <label className="text-xs block mb-1.5" style={{ color: '#6B6B6B' }}>説明</label>
+              <label className="text-xs block mb-1.5 text-muted-foreground">説明</label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 placeholder="タスクの詳細（任意）"
-                className="text-sm resize-none"
+                className="text-sm resize-none bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
                 rows={3}
-                style={{
-                  background: '#141414',
-                  border: '1px solid #2A2A2A',
-                  color: '#F0F0F0',
-                }}
-                onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-                onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setCreateOpen(false)}
-                className="text-xs px-3 py-2 rounded transition-colors"
-                style={{ color: '#6B6B6B', background: '#2A2A2A' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#333')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#2A2A2A')}
+                className="text-xs px-3 py-2 rounded transition-colors bg-secondary text-muted-foreground hover:text-foreground"
               >
                 キャンセル
               </button>
@@ -344,9 +316,7 @@ function TaskRow({
   return (
     <div
       className="flex items-center gap-3 px-4 py-3 group"
-      style={{
-        borderBottom: isLast ? undefined : '1px solid #2A2A2A',
-      }}
+      style={{ borderBottom: isLast ? undefined : '1px solid var(--border)' }}
     >
       {/* Focus toggle */}
       <button
@@ -358,22 +328,17 @@ function TaskRow({
           style={{
             width: 14,
             height: 14,
-            color: task.is_focus ? '#F5A623' : '#3A3A3A',
+            color: task.is_focus ? '#F5A623' : 'var(--border)',
             fill: task.is_focus ? '#F5A623' : 'none',
           }}
         />
       </button>
 
       {/* Title */}
-      <Link
-        href={`/tasks/${task.id}`}
-        className="flex-1 min-w-0 flex items-center gap-2"
-      >
+      <Link href={`/tasks/${task.id}`} className="flex-1 min-w-0">
         <span
-          className="text-sm truncate transition-colors"
-          style={{ color: task.status === 'done' ? '#4A4A4A' : '#F0F0F0' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = task.status === 'done' ? '#4A4A4A' : '#5E6AD2')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = task.status === 'done' ? '#4A4A4A' : '#F0F0F0')}
+          className="text-sm block truncate transition-colors text-foreground hover:text-primary"
+          style={{ opacity: task.status === 'done' ? 0.4 : 1 }}
         >
           {task.title}
         </span>
@@ -381,22 +346,17 @@ function TaskRow({
 
       {/* Due date */}
       {task.due_date && (
-        <span className="text-xs flex-shrink-0" style={{ color: '#6B6B6B' }}>
+        <span className="text-xs flex-shrink-0 text-muted-foreground">
           {formatDate(task.due_date)}
         </span>
       )}
 
-      {/* Status */}
+      {/* Status select */}
       <div className="flex-shrink-0">
         <select
           value={task.status}
           onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-          className="text-xs rounded px-2 py-1 outline-none cursor-pointer"
-          style={{
-            background: '#2A2A2A',
-            border: 'none',
-            color: '#F0F0F0',
-          }}
+          className="text-xs rounded px-2 py-1 outline-none cursor-pointer bg-secondary border-none text-foreground"
         >
           <option value="pending">未着手</option>
           <option value="in_progress">進行中</option>
@@ -404,26 +364,19 @@ function TaskRow({
         </select>
       </div>
 
-      {/* Status dot */}
       <StatusDot variant={statusConf.dot} className="flex-shrink-0" />
 
       {/* Actions */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <Link
           href={`/tasks/${task.id}`}
-          className="p-1 rounded transition-colors"
-          style={{ color: '#6B6B6B' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#6B6B6B')}
+          className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronRight style={{ width: 13, height: 13 }} />
         </Link>
         <button
           onClick={() => onDelete(task)}
-          className="p-1 rounded transition-colors"
-          style={{ color: '#6B6B6B' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#E5484D')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#6B6B6B')}
+          className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"
         >
           <Trash2 style={{ width: 13, height: 13 }} />
         </button>

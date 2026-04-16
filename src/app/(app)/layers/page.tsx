@@ -8,6 +8,7 @@ import { formatDate, getMonthsFromNow, getDaysAgo } from '@/lib/date'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Textarea } from '@/components/ui/textarea'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Suspense } from 'react'
 
 type TabType = 'core_value' | 'roadmap' | 'spec_design'
@@ -68,7 +69,11 @@ function LayersContent() {
   const [loading, setLoading] = useState(true)
   const [createMode, setCreateMode] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({ title: '', content: '', cover_until: '' })
+  const [form, setForm] = useState({
+    title: '',
+    content: '',
+    cover_until: undefined as string | undefined,
+  })
   const [saving, setSaving] = useState(false)
 
   const loadLayers = useCallback(async () => {
@@ -76,6 +81,9 @@ function LayersContent() {
     try {
       const data = await getDesignLayers(activeTab)
       setLayers(data)
+    } catch (e) {
+      console.error(e)
+      toast.error('読み込みに失敗しました')
     } finally {
       setLoading(false)
     }
@@ -95,10 +103,11 @@ function LayersContent() {
       })
       setLayers((prev) => [layer, ...prev])
       setCreateMode(false)
-      setForm({ title: '', content: '', cover_until: '' })
+      setForm({ title: '', content: '', cover_until: undefined })
       toast.success('作成しました')
-    } catch {
-      toast.error('作成に失敗しました')
+    } catch (e) {
+      console.error(e)
+      toast.error(e instanceof Error ? e.message : '作成に失敗しました')
     } finally {
       setSaving(false)
     }
@@ -117,8 +126,9 @@ function LayersContent() {
       setLayers((prev) => prev.map((l) => (l.id === layer.id ? updated : l)))
       setEditingId(null)
       toast.success('更新しました')
-    } catch {
-      toast.error('更新に失敗しました')
+    } catch (e) {
+      console.error(e)
+      toast.error(e instanceof Error ? e.message : '更新に失敗しました')
     } finally {
       setSaving(false)
     }
@@ -130,7 +140,8 @@ function LayersContent() {
       await deleteDesignLayer(layer.id)
       setLayers((prev) => prev.filter((l) => l.id !== layer.id))
       toast.success('削除しました')
-    } catch {
+    } catch (e) {
+      console.error(e)
       toast.error('削除に失敗しました')
     }
   }
@@ -140,7 +151,7 @@ function LayersContent() {
     setForm({
       title: layer.title,
       content: layer.content ?? '',
-      cover_until: layer.cover_until ?? '',
+      cover_until: layer.cover_until ?? undefined,
     })
   }
 
@@ -151,11 +162,11 @@ function LayersContent() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-lg font-semibold" style={{ color: '#F0F0F0' }}>設計レイヤー</h2>
-          <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>設計の貯金残高を管理する</p>
+          <h2 className="text-lg font-semibold text-foreground">設計レイヤー</h2>
+          <p className="text-xs mt-1 text-muted-foreground">設計の貯金残高を管理する</p>
         </div>
         <button
-          onClick={() => { setCreateMode(true); setEditingId(null); setForm({ title: '', content: '', cover_until: '' }) }}
+          onClick={() => { setCreateMode(true); setEditingId(null); setForm({ title: '', content: '', cover_until: undefined }) }}
           className="flex items-center gap-1.5 text-xs px-3 py-2 rounded transition-colors"
           style={{ background: '#5E6AD2', color: '#FFFFFF' }}
           onMouseEnter={(e) => (e.currentTarget.style.background = '#4F5BC0')}
@@ -167,15 +178,15 @@ function LayersContent() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 mb-6" style={{ borderBottom: '1px solid #2A2A2A', paddingBottom: 0 }}>
+      <div className="flex items-center gap-1 mb-6 border-b border-border">
         {(Object.keys(TAB_CONFIG) as TabType[]).map((tab) => (
           <button
             key={tab}
             onClick={() => { setActiveTab(tab); setCreateMode(false); setEditingId(null) }}
             className="text-xs px-4 py-2.5 transition-colors -mb-px"
             style={{
-              color: activeTab === tab ? '#F0F0F0' : '#6B6B6B',
-              borderBottom: activeTab === tab ? '1px solid #5E6AD2' : '1px solid transparent',
+              color: activeTab === tab ? 'var(--foreground)' : 'var(--muted-foreground)',
+              borderBottom: activeTab === tab ? '2px solid #5E6AD2' : '2px solid transparent',
             }}
           >
             {TAB_CONFIG[tab].label}
@@ -185,32 +196,22 @@ function LayersContent() {
 
       {/* Create form */}
       {createMode && (
-        <div
-          className="rounded-lg p-5 mb-4"
-          style={{ background: '#1A1A1A', border: '1px solid #5E6AD2' }}
-        >
+        <div className="rounded-lg p-5 mb-4 bg-card" style={{ border: '1px solid #5E6AD2' }}>
           <div className="space-y-3">
             <input
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="タイトル"
               autoFocus
-              className="w-full text-sm px-3 py-2 rounded outline-none"
-              style={{ background: '#141414', border: '1px solid #2A2A2A', color: '#F0F0F0' }}
-              onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-              onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
+              className="w-full text-sm px-3 py-2 rounded outline-none bg-input border border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
             />
             {config.showCoverUntil && (
               <div>
-                <label className="text-xs block mb-1" style={{ color: '#6B6B6B' }}>カバー期限</label>
-                <input
-                  type="date"
+                <label className="text-xs block mb-1 text-muted-foreground">カバー期限</label>
+                <DatePicker
                   value={form.cover_until}
-                  onChange={(e) => setForm((f) => ({ ...f, cover_until: e.target.value }))}
-                  className="text-sm px-3 py-2 rounded outline-none"
-                  style={{ background: '#141414', border: '1px solid #2A2A2A', color: '#F0F0F0', colorScheme: 'dark' }}
-                  onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-                  onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
+                  onChange={(v) => setForm((f) => ({ ...f, cover_until: v }))}
+                  placeholder="カバー期限を選択"
                 />
               </div>
             )}
@@ -219,23 +220,19 @@ function LayersContent() {
               onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
               placeholder="内容（任意）"
               rows={3}
-              className="text-sm resize-none"
-              style={{ background: '#141414', border: '1px solid #2A2A2A', color: '#F0F0F0' }}
-              onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-              onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
+              className="text-sm resize-none bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setCreateMode(false)}
-                className="text-xs px-3 py-1.5 rounded"
-                style={{ color: '#6B6B6B', background: '#2A2A2A' }}
+                className="text-xs px-3 py-1.5 rounded bg-secondary text-muted-foreground hover:text-foreground transition-colors"
               >
                 キャンセル
               </button>
               <button
                 onClick={handleCreate}
                 disabled={!form.title.trim() || saving}
-                className="text-xs px-3 py-1.5 rounded disabled:opacity-50"
+                className="text-xs px-3 py-1.5 rounded disabled:opacity-50 transition-colors"
                 style={{ background: '#5E6AD2', color: '#FFFFFF' }}
               >
                 {saving ? '作成中...' : '作成'}
@@ -247,13 +244,10 @@ function LayersContent() {
 
       {/* Layer list */}
       {loading ? (
-        <div className="text-xs text-center py-8" style={{ color: '#6B6B6B' }}>読み込み中...</div>
+        <div className="text-xs text-center py-8 text-muted-foreground">読み込み中...</div>
       ) : layers.length === 0 && !createMode ? (
-        <div
-          className="rounded-lg px-5 py-10 text-center"
-          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
-        >
-          <p className="text-xs" style={{ color: '#6B6B6B' }}>ドキュメントがありません</p>
+        <div className="rounded-lg px-5 py-10 text-center bg-card border border-border">
+          <p className="text-xs text-muted-foreground">ドキュメントがありません</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -264,8 +258,8 @@ function LayersContent() {
             return (
               <div
                 key={layer.id}
-                className="rounded-lg p-5 group"
-                style={{ background: '#1A1A1A', border: `1px solid ${isEditing ? '#5E6AD2' : '#2A2A2A'}` }}
+                className="rounded-lg p-5 group bg-card"
+                style={{ border: `1px solid ${isEditing ? '#5E6AD2' : 'var(--border)'}` }}
               >
                 {isEditing ? (
                   <div className="space-y-3">
@@ -273,20 +267,15 @@ function LayersContent() {
                       value={form.title}
                       onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                       autoFocus
-                      className="w-full text-sm px-3 py-2 rounded outline-none"
-                      style={{ background: '#141414', border: '1px solid #5E6AD2', color: '#F0F0F0' }}
+                      className="w-full text-sm px-3 py-2 rounded outline-none bg-input border border-ring text-foreground"
                     />
                     {config.showCoverUntil && (
                       <div>
-                        <label className="text-xs block mb-1" style={{ color: '#6B6B6B' }}>カバー期限</label>
-                        <input
-                          type="date"
+                        <label className="text-xs block mb-1 text-muted-foreground">カバー期限</label>
+                        <DatePicker
                           value={form.cover_until}
-                          onChange={(e) => setForm((f) => ({ ...f, cover_until: e.target.value }))}
-                          className="text-sm px-3 py-2 rounded outline-none"
-                          style={{ background: '#141414', border: '1px solid #2A2A2A', color: '#F0F0F0', colorScheme: 'dark' }}
-                          onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-                          onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
+                          onChange={(v) => setForm((f) => ({ ...f, cover_until: v }))}
+                          placeholder="カバー期限を選択"
                         />
                       </div>
                     )}
@@ -294,16 +283,12 @@ function LayersContent() {
                       value={form.content}
                       onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
                       rows={4}
-                      className="text-sm resize-none"
-                      style={{ background: '#141414', border: '1px solid #2A2A2A', color: '#F0F0F0' }}
-                      onFocus={(e) => (e.target.style.borderColor = '#5E6AD2')}
-                      onBlur={(e) => (e.target.style.borderColor = '#2A2A2A')}
+                      className="text-sm resize-none bg-input border-border text-foreground focus:border-ring"
                     />
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => setEditingId(null)}
-                        className="p-1.5 rounded"
-                        style={{ color: '#6B6B6B' }}
+                        className="p-1.5 rounded text-muted-foreground hover:text-foreground"
                       >
                         <X style={{ width: 14, height: 14 }} />
                       </button>
@@ -321,9 +306,7 @@ function LayersContent() {
                   <>
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <h3 className="text-sm font-medium" style={{ color: '#F0F0F0' }}>
-                          {layer.title}
-                        </h3>
+                        <h3 className="text-sm font-medium text-foreground">{layer.title}</h3>
                         <span
                           className="text-xs px-2 py-0.5 rounded-full"
                           style={{
@@ -337,19 +320,13 @@ function LayersContent() {
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => startEdit(layer)}
-                          className="p-1.5 rounded transition-colors"
-                          style={{ color: '#6B6B6B' }}
-                          onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = '#6B6B6B')}
+                          className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
                         >
                           <Pencil style={{ width: 13, height: 13 }} />
                         </button>
                         <button
                           onClick={() => handleDelete(layer)}
-                          className="p-1.5 rounded transition-colors"
-                          style={{ color: '#6B6B6B' }}
-                          onMouseEnter={(e) => (e.currentTarget.style.color = '#E5484D')}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = '#6B6B6B')}
+                          className="p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors"
                         >
                           <Trash2 style={{ width: 13, height: 13 }} />
                         </button>
@@ -357,21 +334,18 @@ function LayersContent() {
                     </div>
 
                     <div className="flex items-center gap-4 mb-2">
-                      <span className="text-xs" style={{ color: '#6B6B6B' }}>
+                      <span className="text-xs text-muted-foreground">
                         最終更新: {formatDate(layer.last_updated_at)}
                       </span>
                       {config.showCoverUntil && layer.cover_until && (
-                        <span className="text-xs" style={{ color: '#6B6B6B' }}>
+                        <span className="text-xs text-muted-foreground">
                           カバー期限: {formatDate(layer.cover_until)}
                         </span>
                       )}
                     </div>
 
                     {layer.content && (
-                      <p
-                        className="text-xs leading-relaxed mt-3 whitespace-pre-wrap"
-                        style={{ color: '#8A8A8A' }}
-                      >
+                      <p className="text-xs leading-relaxed mt-3 whitespace-pre-wrap text-muted-foreground">
                         {layer.content}
                       </p>
                     )}
