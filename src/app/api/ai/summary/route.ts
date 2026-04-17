@@ -50,10 +50,10 @@ ${taskList}`,
       .select('id').eq('user_id', user.id).eq('week_start', weekStart).maybeSingle()
 
     if (existing) {
-      await supabase.schema('taskgo').from('weekly_summaries').update({ content: content.text }).eq('id', existing.id)
+      await supabase.schema('taskgo').from('weekly_summaries').update({ summary: content.text }).eq('id', existing.id)
     } else {
       await supabase.schema('taskgo').from('weekly_summaries')
-        .insert({ user_id: user.id, week_start: weekStart, content: content.text })
+        .insert({ user_id: user.id, week_start: weekStart, summary: content.text })
     }
 
     return NextResponse.json({ summary: content.text })

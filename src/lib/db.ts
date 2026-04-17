@@ -266,20 +266,20 @@ export async function getWeeklySummary(weekStart: string): Promise<WeeklySummary
   return data
 }
 
-export async function saveWeeklySummary(weekStart: string, content: string): Promise<WeeklySummary> {
+export async function saveWeeklySummary(weekStart: string, summaryText: string): Promise<WeeklySummary> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('認証エラー')
 
   const existing = await getWeeklySummary(weekStart)
   if (existing) {
-    const { data, error } = await db().from('weekly_summaries').update({ content })
+    const { data, error } = await db().from('weekly_summaries').update({ summary: summaryText })
       .eq('id', existing.id).select().single()
     if (error) throw new Error(`updateWeeklySummary: ${error.message}`)
     return data
   }
   const { data, error } = await db().from('weekly_summaries')
-    .insert({ user_id: user.id, week_start: weekStart, content }).select().single()
+    .insert({ user_id: user.id, week_start: weekStart, summary: summaryText }).select().single()
   if (error) throw new Error(`createWeeklySummary: ${error.message}`)
   return data
 }
@@ -329,7 +329,8 @@ export async function checkAndGenerateRecurringTasks(): Promise<Task[]> {
 
   const today = toYMD(new Date())
   const recurringTasks = await getRecurringTasks()
-  const due = recurringTasks.filter((rt) => rt.next_generate_at <= today)
+  // next_generate_at は timestamptz で返るため先頭10文字（YYYY-MM-DD）で比較
+  const due = recurringTasks.filter((rt) => rt.next_generate_at.slice(0, 10) <= today)
   if (!due.length) return []
 
   const generated: Task[] = []

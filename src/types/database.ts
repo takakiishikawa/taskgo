@@ -46,10 +46,8 @@ export interface Tag {
 }
 
 export interface TaskTag {
-  id: string
   task_id: string
   tag_id: string
-  created_at: string
 }
 
 export interface WeeklyFocus {
@@ -71,8 +69,8 @@ export interface WeeklySummary {
   id: string
   user_id: string
   week_start: string
-  content: string
-  created_at: string
+  summary: string
+  generated_at: string
 }
 
 export interface RecurringTask {

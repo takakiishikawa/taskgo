@@ -185,8 +185,8 @@ export default function DashboardPage() {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setWeeklySummary((prev) => prev
-        ? { ...prev, content: data.summary }
-        : { id: '', user_id: '', week_start: thisWeek, content: data.summary, created_at: '' }
+        ? { ...prev, summary: data.summary }
+        : { id: '', user_id: '', week_start: thisWeek, summary: data.summary, generated_at: '' }
       )
       toast.success('週次サマリーを生成しました')
     } catch (e) {
@@ -390,7 +390,7 @@ export default function DashboardPage() {
             </div>
           ) : weeklySummary ? (
             <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
-              {weeklySummary.content}
+              {weeklySummary.summary}
             </p>
           ) : (
             <p className="text-xs text-muted-foreground">
