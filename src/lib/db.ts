@@ -8,6 +8,17 @@ import { getWeekStart, toYMD } from '@/lib/date'
 const SCHEMA = 'taskgo' as const
 function db() { return createClient().schema(SCHEMA) }
 
+async function requireUser() {
+  const { data: { user }, error } = await createClient().auth.getUser()
+  if (error || !user) throw new Error('認証エラー')
+  return user
+}
+
+async function getUser() {
+  const { data: { user } } = await createClient().auth.getUser()
+  return user
+}
+
 // ── Tasks ──────────────────────────────────────────────
 
 export async function getTasks(): Promise<Task[]> {
@@ -25,9 +36,7 @@ export async function getTask(id: string): Promise<Task | null> {
 export async function createTask(params: {
   title: string; description?: string; layer_type: LayerType; due_date?: string
 }): Promise<Task> {
-  const supabase = createClient()
-  const { data: { user }, error: ae } = await supabase.auth.getUser()
-  if (ae || !user) throw new Error('認証エラー')
+  const user = await requireUser()
   const { data, error } = await db().from('tasks').insert({
     user_id: user.id, title: params.title,
     description: params.description ?? null,
@@ -101,9 +110,7 @@ export async function getTaskTagIds(taskId: string): Promise<string[]> {
 
 /** タグ名からタグを upsert してタスクに紐づける */
 export async function addTagToTask(taskId: string, tagName: string): Promise<Tag> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('認証エラー')
+  const user = await requireUser()
 
   // 既存タグを検索
   const { data: existing } = await db().from('tags').select('*')
@@ -148,9 +155,7 @@ export async function upsertDesignLayer(params: {
   id?: string; layer_type: 'core_value' | 'roadmap' | 'spec_design'
   title: string; content?: string; cover_until?: string
 }): Promise<DesignLayer> {
-  const supabase = createClient()
-  const { data: { user }, error: ae } = await supabase.auth.getUser()
-  if (ae || !user) throw new Error('認証エラー')
+  const user = await requireUser()
   const now = new Date().toISOString()
   if (params.id) {
     const { data, error } = await db().from('design_layers').update({
@@ -192,9 +197,7 @@ export async function getAiSuggestions(taskId: string): Promise<AiSuggestion[]> 
 // ── Weekly Focus ───────────────────────────────────────
 
 export async function getOrCreateWeeklyFocus(weekStart: string): Promise<WeeklyFocus> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('認証エラー')
+  const user = await requireUser()
 
   const { data: existing } = await db().from('weekly_focuses').select('*')
     .eq('user_id', user.id).eq('week_start', weekStart).maybeSingle()
@@ -207,8 +210,7 @@ export async function getOrCreateWeeklyFocus(weekStart: string): Promise<WeeklyF
 }
 
 export async function getWeeklyFocus(weekStart: string): Promise<WeeklyFocus | null> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   if (!user) return null
   const { data } = await db().from('weekly_focuses').select('*')
     .eq('user_id', user.id).eq('week_start', weekStart).maybeSingle()
@@ -258,8 +260,7 @@ export async function markWeeklyFocusTaskDone(wfTaskId: string, isDone: boolean)
 // ── Weekly Summary ─────────────────────────────────────
 
 export async function getWeeklySummary(weekStart: string): Promise<WeeklySummary | null> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   if (!user) return null
   const { data } = await db().from('weekly_summaries').select('*')
     .eq('user_id', user.id).eq('week_start', weekStart).maybeSingle()
@@ -267,9 +268,7 @@ export async function getWeeklySummary(weekStart: string): Promise<WeeklySummary
 }
 
 export async function saveWeeklySummary(weekStart: string, summaryText: string): Promise<WeeklySummary> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('認証エラー')
+  const user = await requireUser()
 
   const existing = await getWeeklySummary(weekStart)
   if (existing) {
@@ -300,16 +299,14 @@ export async function getThisWeekCompletedTasks(): Promise<Task[]> {
 // ── Recurring Tasks ────────────────────────────────────
 
 export async function getRecurringTasks(): Promise<RecurringTask[]> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   if (!user) return []
   const { data } = await db().from('recurring_tasks').select('*').eq('user_id', user.id)
   return data ?? []
 }
 
 export async function initRecurringTasksIfNeeded(): Promise<void> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   if (!user) return
 
   const existing = await getRecurringTasks()
@@ -323,8 +320,7 @@ export async function initRecurringTasksIfNeeded(): Promise<void> {
 }
 
 export async function checkAndGenerateRecurringTasks(): Promise<Task[]> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   if (!user) return []
 
   const today = toYMD(new Date())

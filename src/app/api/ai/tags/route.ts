@@ -1,13 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-const LAYER_LABELS: Record<string, string> = {
-  core_value: 'コアバリュー', roadmap: 'ロードマップ',
-  spec_design: '仕様・デザイン', other: 'その他',
-}
+import { getServerContext } from '@/lib/supabase/server-helpers'
+import { anthropic } from '@/lib/anthropic'
+import { LAYER_LABELS } from '@/lib/constants'
 
 function parseTagArray(text: string): string[] {
   try {
@@ -24,8 +18,7 @@ function parseTagArray(text: string): string[] {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user } = await getServerContext()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { title, description, layerType } = await request.json()
@@ -41,7 +34,7 @@ JSON配列で返してください。例: ["リプレイス", "設計"]
 
 タスクタイトル: ${title}
 説明: ${description ?? '（なし）'}
-レイヤー: ${LAYER_LABELS[layerType] ?? layerType}`,
+レイヤー: ${LAYER_LABELS[layerType as keyof typeof LAYER_LABELS] ?? layerType}`,
       }],
     })
 

@@ -1,22 +1,18 @@
-import { createClient } from '@/lib/supabase/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { getServerContext } from '@/lib/supabase/server-helpers'
+import { anthropic, extractText } from '@/lib/anthropic'
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { user, db } = await getServerContext()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { weekStart } = await request.json()
 
-    // 今週完了タスクを取得
     const weekEnd = new Date(weekStart)
     weekEnd.setDate(weekEnd.getDate() + 7)
 
-    const { data: tasks } = await supabase.schema('taskgo').from('tasks').select('title, output_note')
+    const { data: tasks } = await db.from('tasks').select('title, output_note')
       .eq('status', 'done').eq('user_id', user.id)
       .gte('completed_at', weekStart)
       .lt('completed_at', weekEnd.toISOString().split('T')[0])
@@ -42,21 +38,19 @@ ${taskList}`,
       }],
     })
 
-    const content = message.content[0]
-    if (content.type !== 'text') return NextResponse.json({ error: 'Unexpected response' }, { status: 500 })
+    const summaryText = extractText(message)
 
-    // weekly_summaries に保存
-    const { data: existing } = await supabase.schema('taskgo').from('weekly_summaries')
+    const { data: existing } = await db.from('weekly_summaries')
       .select('id').eq('user_id', user.id).eq('week_start', weekStart).maybeSingle()
 
     if (existing) {
-      await supabase.schema('taskgo').from('weekly_summaries').update({ summary: content.text }).eq('id', existing.id)
+      await db.from('weekly_summaries').update({ summary: summaryText }).eq('id', existing.id)
     } else {
-      await supabase.schema('taskgo').from('weekly_summaries')
-        .insert({ user_id: user.id, week_start: weekStart, summary: content.text })
+      await db.from('weekly_summaries')
+        .insert({ user_id: user.id, week_start: weekStart, summary: summaryText })
     }
 
-    return NextResponse.json({ summary: content.text })
+    return NextResponse.json({ summary: summaryText })
   } catch (e) {
     console.error('[ai/summary]', e)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
