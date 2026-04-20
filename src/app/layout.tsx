@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { DesignTokens, Toaster } from '@takaki/go-design-system'
+import { DesignTokens, AppLayout, Toaster } from '@takaki/go-design-system'
+import { TaskGoSidebar } from '@/components/layout/sidebar'
+import { createClient } from '@/lib/supabase/server'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -14,11 +16,14 @@ export const metadata: Metadata = {
   description: 'PdMの設計貯金を守るツール',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <html
       lang="ja"
@@ -29,7 +34,13 @@ export default function RootLayout({
         <DesignTokens primaryColor="#5E6AD2" primaryColorHover="#4F5BC0" />
       </head>
       <body className="min-h-full">
-        {children}
+        {user ? (
+          <AppLayout sidebar={<TaskGoSidebar />}>
+            {children}
+          </AppLayout>
+        ) : (
+          <main>{children}</main>
+        )}
         <Toaster position="bottom-right" />
       </body>
     </html>
