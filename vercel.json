@@ -1,5 +1,3 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next"
+  "buildCommand": "npm update @takaki/go-design-system && npm run build"
 }

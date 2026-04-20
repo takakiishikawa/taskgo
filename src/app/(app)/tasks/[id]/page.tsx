@@ -13,14 +13,14 @@ import { OutputModal } from '@/components/ui/output-modal'
 import { DatePicker } from '@/components/ui/date-picker'
 import { ArrowLeft, Sparkles, BookOpen, Clock, Tag as TagIcon, X, AlertTriangle, Plus } from 'lucide-react'
 import { toast } from 'sonner'
-import { Textarea } from '@/components/ui/textarea'
 import {
+  Textarea,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@takaki/go-design-system'
 
 const LAYER_LABELS: Record<LayerType, string> = {
   core_value: 'コアバリュー',

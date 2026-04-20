@@ -6,8 +6,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
+  Textarea,
+  Button,
+} from '@takaki/go-design-system'
 import { CheckCircle2 } from 'lucide-react'
 
 interface OutputModalProps {
@@ -39,17 +40,17 @@ export function OutputModal({ open, taskTitle, onSave, onSkip }: OutputModalProp
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) handleSkip() }}>
-      <DialogContent className="bg-card border-border max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 style={{ width: 16, height: 16, color: '#30A46C' }} />
-            <DialogTitle className="text-foreground text-sm">タスク完了</DialogTitle>
+            <CheckCircle2 className="w-4 h-4 text-success" />
+            <DialogTitle className="text-sm">タスク完了</DialogTitle>
           </div>
         </DialogHeader>
 
         <div className="mt-1">
           <p className="text-sm text-muted-foreground mb-1 truncate">「{taskTitle}」</p>
-          <p className="text-sm font-medium text-foreground mb-4">
+          <p className="text-sm font-medium mb-4">
             このタスクで出したアウトプット・バリューを一言で記録しましょう
           </p>
 
@@ -57,7 +58,7 @@ export function OutputModal({ open, taskTitle, onSave, onSkip }: OutputModalProp
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="例: ロードマップv2の骨子を決定、○○機能の仕様書を完成 など"
-            className="text-sm resize-none bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-ring mb-4"
+            className="text-sm resize-none mb-4"
             rows={3}
             autoFocus
             onKeyDown={(e) => {
@@ -66,21 +67,12 @@ export function OutputModal({ open, taskTitle, onSave, onSkip }: OutputModalProp
           />
 
           <div className="flex justify-end gap-2">
-            <button
-              onClick={handleSkip}
-              disabled={saving}
-              className="text-sm px-3 py-2 rounded transition-colors bg-secondary text-muted-foreground hover:text-foreground"
-            >
+            <Button variant="secondary" onClick={handleSkip} disabled={saving}>
               スキップ
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving || !note.trim()}
-              className="text-sm px-4 py-2 rounded transition-colors disabled:opacity-50"
-              style={{ background: '#30A46C', color: '#FFFFFF' }}
-            >
+            </Button>
+            <Button onClick={handleSave} disabled={saving || !note.trim()}>
               {saving ? '保存中...' : '記録する'}
-            </button>
+            </Button>
           </div>
         </div>
       </DialogContent>

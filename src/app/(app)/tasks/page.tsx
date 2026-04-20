@@ -18,15 +18,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+  Textarea,
+} from '@takaki/go-design-system'
 import { DatePicker } from '@/components/ui/date-picker'
 
 const LAYER_LABELS: Record<LayerType, string> = {

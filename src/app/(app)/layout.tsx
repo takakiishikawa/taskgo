@@ -1,14 +1,20 @@
-import { Sidebar } from '@/components/layout/sidebar'
+import { AppLayout } from '@takaki/go-design-system'
+import { TaskGoSidebar } from '@/components/layout/sidebar'
+import { createClient } from '@/lib/supabase/server'
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return <main>{children}</main>
+  }
+
   return (
-    <div className="flex min-h-screen bg-background">
-      <div className="border-r border-border bg-sidebar">
-        <Sidebar />
-      </div>
-      <main className="flex-1 overflow-auto bg-background">
-        {children}
-      </main>
-    </div>
+    <AppLayout sidebar={<TaskGoSidebar />}>
+      {children}
+    </AppLayout>
   )
 }

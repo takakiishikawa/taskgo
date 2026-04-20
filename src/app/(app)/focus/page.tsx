@@ -20,7 +20,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@takaki/go-design-system'
 
 const WEEK_OFFSETS = [0, 1, 2, 3, 4]
 

@@ -1,18 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter, Geist_Mono } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
-import { Toaster } from '@/components/ui/sonner'
-import { ThemeProvider } from '@/components/theme-provider'
+import { DesignTokens, Toaster } from '@takaki/go-design-system'
 
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
   display: 'swap',
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
 })
 
 export const metadata: Metadata = {
@@ -28,22 +22,15 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster
-            theme="system"
-            position="bottom-right"
-          />
-        </ThemeProvider>
+      <head>
+        <DesignTokens primaryColor="#5E6AD2" primaryColorHover="#4F5BC0" />
+      </head>
+      <body className="min-h-full">
+        {children}
+        <Toaster position="bottom-right" />
       </body>
     </html>
   )

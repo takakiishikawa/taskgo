@@ -7,7 +7,7 @@ import type { DesignLayer } from '@/types/database'
 import { formatDate, getMonthsFromNow, getDaysAgo } from '@/lib/date'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '@takaki/go-design-system'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Suspense } from 'react'
 
