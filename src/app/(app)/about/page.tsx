@@ -3,24 +3,24 @@ import { PageHeader, Section } from '@takaki/go-design-system'
 
 export default function AboutPage() {
   return (
-    <div className="px-8 py-8 max-w-2xl space-y-8">
+    <div className="px-8 py-8 max-w-4xl space-y-8">
       <PageHeader
-        title="TaskGo"
-        description="PdMの設計貯金を守るツール"
-        actions={
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 70%, #ffffff) 100%)' }}
-          >
-            <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </div>
-        }
+        title="コンセプト・使い方"
+        description="TaskGoの設計思想と使い方ガイド"
       />
 
-      <p className="text-sm text-muted-foreground leading-relaxed">
-        TaskGoはタスクを記録・管理するためのツールではありません。<br />
-        <span className="text-foreground font-medium">PdMが設計系タスクを先回りして実行し続ける構造を作る</span>ためのツールです。
-      </p>
+      <div className="flex items-start gap-4 rounded-lg p-5 bg-card border border-border">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 70%, #ffffff) 100%)' }}
+        >
+          <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed pt-1">
+          TaskGoはタスクを記録・管理するためのツールではありません。<br />
+          <span className="text-foreground font-medium">PdMが設計系タスクを先回りして実行し続ける構造を作る</span>ためのツールです。
+        </p>
+      </div>
 
       {/* 解決する課題 */}
       <Section title="解決する4つの課題">
@@ -36,25 +36,27 @@ export default function AboutPage() {
               num: '02',
               title: '反応型タスクが設計時間を侵食する',
               body: '詳細仕様の確認・デザインレビュー・問題相談など、割り込みタスクが日常的に発生して設計の集中時間が削がれる。',
+              accent: false,
             },
             {
               num: '03',
               title: '着手コストが高いタスクが止まる',
               body: '「締め切りがまだ先」×「最初の一手が不明確」の掛け合わせで止まりやすい。着手さえすれば進むが、初動のハードルが高い。',
+              accent: false,
             },
             {
               num: '04',
               title: '設計の壁打ち・レビュー相手がいない',
               body: 'シニアマネージャー退職後、設計の質を担保するフィードバックループが機能していない。毎回プロンプトを書かずにAIと相談できる環境が必要。',
+              accent: false,
             },
           ].map((item) => (
             <div
               key={item.num}
-              className="rounded-lg p-4 bg-card"
-              style={{ border: item.accent ? '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)' : '1px solid var(--border)' }}
+              className={`rounded-lg p-4 bg-card border ${item.accent ? 'border-[color:var(--color-primary)]/40' : 'border-border'}`}
             >
               <div className="flex items-start gap-3">
-                <span className="text-xs font-mono font-bold shrink-0 mt-0.5" style={{ color: item.accent ? 'var(--color-primary)' : 'var(--muted-foreground)' }}>
+                <span className={`text-xs font-mono font-bold shrink-0 mt-0.5 ${item.accent ? 'text-primary' : 'text-muted-foreground'}`}>
                   {item.num}
                 </span>
                 <div>
@@ -142,7 +144,7 @@ export default function AboutPage() {
 
       {/* 目指す理想状態 */}
       <Section title="目指す理想状態">
-        <div className="rounded-lg p-5 bg-[color:var(--color-primary)]/6 border border-[color:var(--color-primary)]/20">
+        <div className="rounded-lg p-5 bg-card border border-[color:var(--color-primary)]/20">
           <ul className="space-y-2">
             {[
               'ロードマップが常に今から1年以上先までカバーされている',
