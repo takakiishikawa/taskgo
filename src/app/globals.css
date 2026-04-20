@@ -2,21 +2,19 @@
 @source "../node_modules/@takaki/go-design-system/dist";
 @import "@takaki/go-design-system/theme.css";
 
-/* class-based dark mode */
 @variant dark (&:where(.dark, .dark *));
 
-/* TaskGo primary color override */
-:root {
-  --color-primary: #5E6AD2;
-  --color-primary-hover: #4F5BC0;
-}
-
 @layer base {
+  * { @apply border-border outline-ring/50; }
   body {
-    color: var(--foreground);
-    background-color: var(--background);
+    @apply bg-background text-foreground;
+    font-size: 14px;
     min-width: 1280px;
   }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-background); }
+  ::-webkit-scrollbar-thumb { background: var(--color-surface-subtle); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-subtle); }
 }
 
 @theme inline {

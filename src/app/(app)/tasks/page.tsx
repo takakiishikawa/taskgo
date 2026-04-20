@@ -2,45 +2,23 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
-import {
-  getTasks, createTask, updateTask, deleteTask,
-  getTagsForTasks, getAllTags,
-} from '@/lib/db'
-import type { Task, LayerType, TaskStatus, Tag } from '@/types/database'
+import { getTasks, createTask, updateTask, deleteTask, getTagsForTasks, getAllTags } from '@/lib/db'
+import type { Task, TaskStatus, Tag } from '@/types/database'
 import { StatusDot } from '@/components/ui/status-dot'
 import { TagBadge } from '@/components/ui/tag-badge'
 import { OutputModal } from '@/components/ui/output-modal'
 import { formatDate } from '@/lib/date'
-import { Plus, Star, Trash2, ChevronRight, Tag as TagIcon, X } from 'lucide-react'
-import { toast } from 'sonner'
+import { LAYER_LABELS, LAYER_ORDER, STATUS_LABEL, STATUS_DOT } from '@/lib/constants'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Button, Input,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
   Textarea,
 } from '@takaki/go-design-system'
 import { DatePicker } from '@/components/ui/date-picker'
-
-const LAYER_LABELS: Record<LayerType, string> = {
-  core_value: 'コアバリュー',
-  roadmap: 'ロードマップ',
-  spec_design: '仕様・デザイン',
-  other: 'その他',
-}
-
-const LAYER_ORDER: LayerType[] = ['core_value', 'roadmap', 'spec_design', 'other']
-
-const STATUS_CONFIG: Record<TaskStatus, { label: string; dot: 'gray' | 'blue' | 'green' }> = {
-  pending: { label: '未着手', dot: 'gray' },
-  in_progress: { label: '進行中', dot: 'blue' },
-  done: { label: '完了', dot: 'green' },
-}
+import { Plus, Star, Trash2, ChevronRight, Tag as TagIcon, X } from 'lucide-react'
+import { toast } from 'sonner'
+import type { LayerType } from '@/types/database'
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -57,11 +35,7 @@ export default function TasksPage() {
     due_date: undefined as string | undefined,
   })
   const [creating, setCreating] = useState(false)
-
-  // Output modal state
-  const [outputModal, setOutputModal] = useState<{ open: boolean; task: Task | null }>({
-    open: false, task: null,
-  })
+  const [outputModal, setOutputModal] = useState<{ open: boolean; task: Task | null }>({ open: false, task: null })
   const pendingStatusRef = useRef<{ taskId: string; status: TaskStatus } | null>(null)
 
   const loadTasks = useCallback(async () => {
@@ -86,10 +60,7 @@ export default function TasksPage() {
 
   const filteredTasks = tasks.filter((t) => {
     if (statusFilter !== 'all' && t.status !== statusFilter) return false
-    if (tagFilter) {
-      const tags = tagsByTask[t.id] ?? []
-      if (!tags.some((tag) => tag.name === tagFilter)) return false
-    }
+    if (tagFilter && !(tagsByTask[t.id] ?? []).some((tag) => tag.name === tagFilter)) return false
     return true
   })
 
@@ -107,8 +78,7 @@ export default function TasksPage() {
     try {
       const updated = await updateTask(task.id, { is_focus: !task.is_focus })
       setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)))
-    } catch (e) {
-      console.error(e)
+    } catch {
       toast.error('更新に失敗しました')
     }
   }
@@ -119,15 +89,13 @@ export default function TasksPage() {
       await deleteTask(task.id)
       setTasks((prev) => prev.filter((t) => t.id !== task.id))
       toast.success('削除しました')
-    } catch (e) {
-      console.error(e)
+    } catch {
       toast.error('削除に失敗しました')
     }
   }
 
   const handleStatusChange = async (task: Task, status: TaskStatus) => {
     if (status === 'done' && task.status !== 'done') {
-      // Show output modal before saving
       pendingStatusRef.current = { taskId: task.id, status }
       setOutputModal({ open: true, task })
       return
@@ -135,8 +103,7 @@ export default function TasksPage() {
     try {
       const updated = await updateTask(task.id, { status })
       setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)))
-    } catch (e) {
-      console.error(e)
+    } catch {
       toast.error('更新に失敗しました')
     }
   }
@@ -145,15 +112,10 @@ export default function TasksPage() {
     const pending = pendingStatusRef.current
     if (!pending) return
     try {
-      const updated = await updateTask(pending.taskId, {
-        status: 'done',
-        output_note: outputNote,
-        completed_at: new Date().toISOString(),
-      })
+      const updated = await updateTask(pending.taskId, { status: 'done', output_note: outputNote, completed_at: new Date().toISOString() })
       setTasks((prev) => prev.map((t) => (t.id === pending.taskId ? updated : t)))
       toast.success('アウトプットを記録しました')
-    } catch (e) {
-      console.error(e)
+    } catch {
       toast.error('更新に失敗しました')
     } finally {
       pendingStatusRef.current = null
@@ -165,13 +127,9 @@ export default function TasksPage() {
     const pending = pendingStatusRef.current
     if (!pending) return
     try {
-      const updated = await updateTask(pending.taskId, {
-        status: 'done',
-        completed_at: new Date().toISOString(),
-      })
+      const updated = await updateTask(pending.taskId, { status: 'done', completed_at: new Date().toISOString() })
       setTasks((prev) => prev.map((t) => (t.id === pending.taskId ? updated : t)))
-    } catch (e) {
-      console.error(e)
+    } catch {
       toast.error('更新に失敗しました')
     } finally {
       pendingStatusRef.current = null
@@ -194,7 +152,6 @@ export default function TasksPage() {
       setForm({ title: '', description: '', layer_type: 'spec_design', due_date: undefined })
       toast.success('タスクを作成しました')
     } catch (e) {
-      console.error(e)
       toast.error(e instanceof Error ? e.message : '作成に失敗しました')
     } finally {
       setCreating(false)
@@ -202,11 +159,7 @@ export default function TasksPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
-        読み込み中...
-      </div>
-    )
+    return <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">読み込み中...</div>
   }
 
   return (
@@ -214,41 +167,34 @@ export default function TasksPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">タスク</h2>
+          <h2 className="text-lg font-semibold">タスク</h2>
           <p className="text-xs mt-1 text-muted-foreground">設計タスクを管理する</p>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded transition-colors bg-primary text-primary-foreground hover:opacity-90"
-        >
+        <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5">
           <Plus className="w-3 h-3" />
           新規タスク
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}
       <div className="flex items-center gap-3 mb-6 flex-wrap">
-        {/* Status filter */}
         <div className="flex items-center gap-1">
           {(['all', 'pending', 'in_progress', 'done'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className="text-sm px-3 py-1.5 rounded transition-colors"
-              style={{
-                background: statusFilter === s ? 'var(--accent)' : 'transparent',
-                color: statusFilter === s ? 'var(--foreground)' : 'var(--muted-foreground)',
-              }}
+              className={`text-sm px-3 py-1.5 rounded transition-colors ${
+                statusFilter === s ? 'bg-accent text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
-              {s === 'all' ? 'すべて' : STATUS_CONFIG[s].label}
+              {s === 'all' ? 'すべて' : STATUS_LABEL[s]}
             </button>
           ))}
         </div>
 
-        {/* Tag filter */}
         {allTags.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap">
-            <TagIcon style={{ width: 12, height: 12, color: 'var(--muted-foreground)' }} />
+            <TagIcon className="w-3 h-3 text-muted-foreground" />
             {allTags.map((tag) => (
               <button
                 key={tag.id}
@@ -264,11 +210,8 @@ export default function TasksPage() {
               </button>
             ))}
             {tagFilter && (
-              <button
-                onClick={() => setTagFilter(null)}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X style={{ width: 10, height: 10 }} />
+              <button onClick={() => setTagFilter(null)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <X className="w-2.5 h-2.5" />
                 クリア
               </button>
             )}
@@ -291,7 +234,6 @@ export default function TasksPage() {
                   {layerTasks.length}
                 </span>
               </div>
-
               <div className="rounded-lg overflow-hidden border border-border bg-card">
                 {layerTasks.map((task, i) => (
                   <TaskRow
@@ -320,35 +262,29 @@ export default function TasksPage() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground text-sm">新規タスク</DialogTitle>
+            <DialogTitle className="text-sm">新規タスク</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
               <label className="text-sm block mb-1.5 text-muted-foreground">タイトル *</label>
-              <input
+              <Input
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                 placeholder="タスクのタイトルを入力"
-                className="w-full text-sm px-3 py-2 rounded outline-none transition-colors bg-input border border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
                 autoFocus
               />
             </div>
 
             <div>
               <label className="text-sm block mb-1.5 text-muted-foreground">レイヤー</label>
-              <Select
-                value={form.layer_type}
-                onValueChange={(v) => setForm((f) => ({ ...f, layer_type: v as LayerType }))}
-              >
-                <SelectTrigger className="text-sm bg-input border-border text-foreground">
+              <Select value={form.layer_type} onValueChange={(v) => setForm((f) => ({ ...f, layer_type: v as LayerType }))}>
+                <SelectTrigger className="text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
+                <SelectContent>
                   {LAYER_ORDER.map((l) => (
-                    <SelectItem key={l} value={l} className="text-foreground text-sm">
-                      {LAYER_LABELS[l]}
-                    </SelectItem>
+                    <SelectItem key={l} value={l} className="text-sm">{LAYER_LABELS[l]}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -356,10 +292,7 @@ export default function TasksPage() {
 
             <div>
               <label className="text-sm block mb-1.5 text-muted-foreground">期日</label>
-              <DatePicker
-                value={form.due_date}
-                onChange={(v) => setForm((f) => ({ ...f, due_date: v }))}
-              />
+              <DatePicker value={form.due_date} onChange={(v) => setForm((f) => ({ ...f, due_date: v }))} />
             </div>
 
             <div>
@@ -368,31 +301,21 @@ export default function TasksPage() {
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 placeholder="タスクの詳細（任意）"
-                className="text-sm resize-none bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
+                className="resize-none"
                 rows={3}
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setCreateOpen(false)}
-                className="text-sm px-3 py-2 rounded transition-colors bg-secondary text-muted-foreground hover:text-foreground"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={!form.title.trim() || creating}
-                className="text-sm px-3 py-2 rounded transition-colors disabled:opacity-50 bg-primary text-primary-foreground hover:opacity-90"
-              >
+              <Button variant="ghost" onClick={() => setCreateOpen(false)}>キャンセル</Button>
+              <Button onClick={handleCreate} disabled={!form.title.trim() || creating}>
                 {creating ? '作成中...' : '作成'}
-              </button>
+              </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Output modal */}
       <OutputModal
         open={outputModal.open}
         taskTitle={outputModal.task?.title ?? ''}
@@ -404,12 +327,7 @@ export default function TasksPage() {
 }
 
 function TaskRow({
-  task,
-  tags,
-  isLast,
-  onToggleFocus,
-  onDelete,
-  onStatusChange,
+  task, tags, isLast, onToggleFocus, onDelete, onStatusChange,
 }: {
   task: Task
   tags: Tag[]
@@ -418,14 +336,8 @@ function TaskRow({
   onDelete: (task: Task) => void
   onStatusChange: (status: TaskStatus) => void
 }) {
-  const statusConf = STATUS_CONFIG[task.status]
-
   return (
-    <div
-      className="flex items-center gap-3 px-4 py-3 group"
-      style={{ borderBottom: isLast ? undefined : '1px solid var(--border)' }}
-    >
-      {/* Focus toggle */}
+    <div className={`flex items-center gap-3 px-4 py-3 group ${isLast ? '' : 'border-b border-border'}`}>
       <button
         onClick={() => onToggleFocus(task)}
         className="flex-shrink-0 transition-colors"
@@ -433,66 +345,45 @@ function TaskRow({
       >
         <Star
           className={task.is_focus ? 'text-warning' : 'text-border'}
-          style={{
-            width: 14,
-            height: 14,
-            fill: task.is_focus ? 'currentColor' : 'none',
-          }}
+          style={{ width: 14, height: 14, fill: task.is_focus ? 'currentColor' : 'none' }}
         />
       </button>
 
-      {/* Title + tags */}
       <Link href={`/tasks/${task.id}`} className="flex-1 min-w-0">
-        <span
-          className="text-sm block truncate transition-colors text-foreground hover:text-primary"
-          style={{ opacity: task.status === 'done' ? 0.4 : 1 }}
-        >
+        <span className={`text-sm block truncate transition-colors hover:text-primary ${task.status === 'done' ? 'opacity-40' : ''}`}>
           {task.title}
         </span>
         {tags.length > 0 && (
           <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-            {tags.map((tag) => (
-              <TagBadge key={tag.id} name={tag.name} size="xs" />
-            ))}
+            {tags.map((tag) => <TagBadge key={tag.id} name={tag.name} size="xs" />)}
           </div>
         )}
       </Link>
 
-      {/* Due date */}
       {task.due_date && (
-        <span className="text-xs flex-shrink-0 text-muted-foreground">
-          {formatDate(task.due_date)}
-        </span>
+        <span className="text-xs flex-shrink-0 text-muted-foreground">{formatDate(task.due_date)}</span>
       )}
 
-      {/* Status select */}
       <div className="flex-shrink-0">
         <select
           value={task.status}
           onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-          className="text-sm rounded px-2 py-1 outline-none cursor-pointer bg-secondary border-none text-foreground"
+          className="text-sm rounded px-2 py-1 outline-none cursor-pointer bg-secondary border-none"
         >
-          <option value="pending">未着手</option>
-          <option value="in_progress">進行中</option>
-          <option value="done">完了</option>
+          {(['pending', 'in_progress', 'done'] as TaskStatus[]).map((s) => (
+            <option key={s} value={s}>{STATUS_LABEL[s]}</option>
+          ))}
         </select>
       </div>
 
-      <StatusDot variant={statusConf.dot} className="flex-shrink-0" />
+      <StatusDot variant={STATUS_DOT[task.status]} className="flex-shrink-0" />
 
-      {/* Actions */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Link
-          href={`/tasks/${task.id}`}
-          className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronRight style={{ width: 13, height: 13 }} />
+        <Link href={`/tasks/${task.id}`} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronRight className="w-3 h-3" />
         </Link>
-        <button
-          onClick={() => onDelete(task)}
-          className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"
-        >
-          <Trash2 style={{ width: 13, height: 13 }} />
+        <button onClick={() => onDelete(task)} className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors">
+          <Trash2 className="w-3 h-3" />
         </button>
       </div>
     </div>

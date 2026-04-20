@@ -14,26 +14,10 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { ArrowLeft, Sparkles, BookOpen, Clock, Tag as TagIcon, X, AlertTriangle, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
-  Textarea,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Button, Input, Textarea,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@takaki/go-design-system'
-
-const LAYER_LABELS: Record<LayerType, string> = {
-  core_value: 'コアバリュー',
-  roadmap: 'ロードマップ',
-  spec_design: '仕様・デザイン',
-  other: 'その他',
-}
-
-const STATUS_CONFIG: Record<TaskStatus, { label: string; dot: 'gray' | 'blue' | 'green' }> = {
-  pending: { label: '未着手', dot: 'gray' },
-  in_progress: { label: '進行中', dot: 'blue' },
-  done: { label: '完了', dot: 'green' },
-}
+import { LAYER_LABELS, LAYER_ORDER, STATUS_LABEL, STATUS_DOT } from '@/lib/constants'
 
 const ISSUE_TITLE_PREFIXES = ['【短期】', '【中期】']
 function isIssueDiscoveryTask(title: string) {
@@ -276,7 +260,6 @@ export default function TaskDetailPage() {
 
   if (!task) return null
 
-  const statusConf = STATUS_CONFIG[task.status]
   const isIssuetask = isIssueDiscoveryTask(task.title)
 
   return (
@@ -294,39 +277,25 @@ export default function TaskDetailPage() {
       <div className="rounded-lg p-6 mb-6 bg-card border border-border">
         <div className="flex items-start justify-between mb-4">
           {editMode ? (
-            <input
+            <Input
               value={editForm.title}
               onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-              className="text-base font-medium flex-1 mr-4 px-2 py-1 rounded outline-none bg-input border border-ring text-foreground"
+              className="text-base font-medium flex-1 mr-4"
             />
           ) : (
             <h2 className="text-base font-medium flex-1 text-foreground">{task.title}</h2>
           )}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <StatusDot variant={statusConf.dot} label={statusConf.label} />
+            <StatusDot variant={STATUS_DOT[task.status]} label={STATUS_LABEL[task.status]} />
             {editMode ? (
               <>
-                <button
-                  onClick={() => setEditMode(false)}
-                  className="text-sm px-2.5 py-1.5 rounded bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  キャンセル
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="text-sm px-2.5 py-1.5 rounded disabled:opacity-50 transition-colors bg-primary text-primary-foreground hover:opacity-90"
-                >
+                <Button variant="ghost" size="sm" onClick={() => setEditMode(false)}>キャンセル</Button>
+                <Button size="sm" onClick={handleSave} disabled={saving}>
                   {saving ? '保存中...' : '保存'}
-                </button>
+                </Button>
               </>
             ) : (
-              <button
-                onClick={() => setEditMode(true)}
-                className="text-sm px-2.5 py-1.5 rounded bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              >
-                編集
-              </button>
+              <Button variant="ghost" size="sm" onClick={() => setEditMode(true)}>編集</Button>
             )}
           </div>
         </div>
@@ -344,7 +313,7 @@ export default function TaskDetailPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  {(Object.keys(LAYER_LABELS) as LayerType[]).map((l) => (
+                  {LAYER_ORDER.map((l) => (
                     <SelectItem key={l} value={l} className="text-foreground text-sm">
                       {LAYER_LABELS[l]}
                     </SelectItem>
@@ -367,15 +336,15 @@ export default function TaskDetailPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  {(Object.keys(STATUS_CONFIG) as TaskStatus[]).map((s) => (
+                  {(Object.keys(STATUS_LABEL) as TaskStatus[]).map((s) => (
                     <SelectItem key={s} value={s} className="text-foreground text-sm">
-                      {STATUS_CONFIG[s].label}
+                      {STATUS_LABEL[s]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             ) : (
-              <span className="text-sm text-foreground">{statusConf.label}</span>
+              <span className="text-sm text-foreground">{STATUS_LABEL[task.status]}</span>
             )}
           </div>
 
@@ -447,7 +416,7 @@ export default function TaskDetailPage() {
 
             {/* Tag input */}
             <div className="flex items-center gap-1">
-              <input
+              <Input
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -457,7 +426,6 @@ export default function TaskDetailPage() {
                   }
                 }}
                 placeholder="タグを追加..."
-                className="text-sm px-2 py-0.5 rounded outline-none bg-input border border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
                 style={{ width: 100 }}
                 list="tag-suggestions"
               />
@@ -533,8 +501,7 @@ export default function TaskDetailPage() {
             <button
               onClick={() => handleAiSuggest('research')}
               disabled={aiLoading !== null}
-              className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors disabled:opacity-50 border-border text-muted-foreground hover:border-ring hover:text-foreground"
-              style={{ background: 'transparent' }}
+              className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors disabled:opacity-50 border-border text-muted-foreground hover:border-ring hover:text-foreground bg-transparent"
             >
               <BookOpen style={{ width: 12, height: 12 }} />
               {aiLoading === 'research' ? '提案中...' : 'リサーチを手伝ってもらう'}

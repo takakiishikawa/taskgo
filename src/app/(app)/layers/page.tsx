@@ -5,10 +5,11 @@ import { useSearchParams } from 'next/navigation'
 import { getDesignLayers, upsertDesignLayer, deleteDesignLayer } from '@/lib/db'
 import type { DesignLayer } from '@/types/database'
 import { formatDate, getMonthsFromNow, getDaysAgo } from '@/lib/date'
+import { HEALTH_BADGE_CLASS } from '@/lib/constants'
+import { Button, Input, Textarea } from '@takaki/go-design-system'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { Textarea } from '@takaki/go-design-system'
-import { DatePicker } from '@/components/ui/date-picker'
 import { Suspense } from 'react'
 
 type TabType = 'core_value' | 'roadmap' | 'spec_design'
@@ -23,9 +24,9 @@ const TAB_CONFIG: Record<TabType, {
     showCoverUntil: false,
     getHealth: (layer) => {
       const days = getDaysAgo(layer.last_updated_at)
-      if (days >= 90) return { status: 'red', label: `${days}日前に更新（要更新）` }
+      if (days >= 90) return { status: 'red',    label: `${days}日前に更新（要更新）` }
       if (days >= 30) return { status: 'yellow', label: `${days}日前に更新（注意）` }
-      return { status: 'green', label: `${days}日前に更新（健康）` }
+      return             { status: 'green',  label: `${days}日前に更新（健康）` }
     },
   },
   roadmap: {
@@ -34,9 +35,9 @@ const TAB_CONFIG: Record<TabType, {
     getHealth: (layer) => {
       if (!layer.cover_until) return { status: 'red', label: 'カバー期限未設定' }
       const m = getMonthsFromNow(layer.cover_until)
-      if (m < 12) return { status: 'red', label: `残り${m}ヶ月（要補充）` }
+      if (m < 12) return { status: 'red',    label: `残り${m}ヶ月（要補充）` }
       if (m < 24) return { status: 'yellow', label: `残り${m}ヶ月（注意）` }
-      return { status: 'green', label: `残り${m}ヶ月（健康）` }
+      return             { status: 'green',  label: `残り${m}ヶ月（健康）` }
     },
   },
   spec_design: {
@@ -45,17 +46,11 @@ const TAB_CONFIG: Record<TabType, {
     getHealth: (layer) => {
       if (!layer.cover_until) return { status: 'red', label: 'カバー期限未設定' }
       const m = getMonthsFromNow(layer.cover_until)
-      if (m < 3) return { status: 'red', label: `残り${m}ヶ月（要補充）` }
+      if (m < 3) return { status: 'red',    label: `残り${m}ヶ月（要補充）` }
       if (m < 6) return { status: 'yellow', label: `残り${m}ヶ月（注意）` }
-      return { status: 'green', label: `残り${m}ヶ月（健康）` }
+      return            { status: 'green',  label: `残り${m}ヶ月（健康）` }
     },
   },
-}
-
-const healthBadgeClass = {
-  green: 'bg-success-subtle text-success',
-  yellow: 'bg-warning-subtle text-warning',
-  red: 'bg-danger-subtle text-destructive',
 }
 
 function LayersContent() {
@@ -68,18 +63,13 @@ function LayersContent() {
   const [loading, setLoading] = useState(true)
   const [createMode, setCreateMode] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({
-    title: '',
-    content: '',
-    cover_until: undefined as string | undefined,
-  })
+  const [form, setForm] = useState({ title: '', content: '', cover_until: undefined as string | undefined })
   const [saving, setSaving] = useState(false)
 
   const loadLayers = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await getDesignLayers(activeTab)
-      setLayers(data)
+      setLayers(await getDesignLayers(activeTab))
     } catch (e) {
       console.error(e)
       toast.error('読み込みに失敗しました')
@@ -105,7 +95,6 @@ function LayersContent() {
       setForm({ title: '', content: '', cover_until: undefined })
       toast.success('作成しました')
     } catch (e) {
-      console.error(e)
       toast.error(e instanceof Error ? e.message : '作成に失敗しました')
     } finally {
       setSaving(false)
@@ -126,7 +115,6 @@ function LayersContent() {
       setEditingId(null)
       toast.success('更新しました')
     } catch (e) {
-      console.error(e)
       toast.error(e instanceof Error ? e.message : '更新に失敗しました')
     } finally {
       setSaving(false)
@@ -139,19 +127,14 @@ function LayersContent() {
       await deleteDesignLayer(layer.id)
       setLayers((prev) => prev.filter((l) => l.id !== layer.id))
       toast.success('削除しました')
-    } catch (e) {
-      console.error(e)
+    } catch {
       toast.error('削除に失敗しました')
     }
   }
 
   const startEdit = (layer: DesignLayer) => {
     setEditingId(layer.id)
-    setForm({
-      title: layer.title,
-      content: layer.content ?? '',
-      cover_until: layer.cover_until ?? undefined,
-    })
+    setForm({ title: layer.title, content: layer.content ?? '', cover_until: layer.cover_until ?? undefined })
   }
 
   const config = TAB_CONFIG[activeTab]
@@ -161,16 +144,17 @@ function LayersContent() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">設計レイヤー</h2>
+          <h2 className="text-lg font-semibold">設計レイヤー</h2>
           <p className="text-xs mt-1 text-muted-foreground">設計の貯金残高を管理する</p>
         </div>
-        <button
+        <Button
+          size="sm"
+          className="gap-1.5"
           onClick={() => { setCreateMode(true); setEditingId(null); setForm({ title: '', content: '', cover_until: undefined }) }}
-          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded transition-colors bg-primary text-primary-foreground hover:opacity-90"
         >
-          <Plus style={{ width: 13, height: 13 }} />
+          <Plus className="w-3 h-3" />
           新規ドキュメント
-        </button>
+        </Button>
       </div>
 
       {/* Tabs */}
@@ -179,11 +163,11 @@ function LayersContent() {
           <button
             key={tab}
             onClick={() => { setActiveTab(tab); setCreateMode(false); setEditingId(null) }}
-            className="text-sm px-4 py-2.5 transition-colors -mb-px"
-            style={{
-              color: activeTab === tab ? 'var(--foreground)' : 'var(--muted-foreground)',
-              borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
-            }}
+            className={`text-sm px-4 py-2.5 transition-colors -mb-px border-b-2 ${
+              activeTab === tab
+                ? 'text-foreground border-[color:var(--color-primary)]'
+                : 'text-muted-foreground border-transparent hover:text-foreground'
+            }`}
           >
             {TAB_CONFIG[tab].label}
           </button>
@@ -194,21 +178,16 @@ function LayersContent() {
       {createMode && (
         <div className="rounded-lg p-5 mb-4 bg-card border border-[color:var(--color-primary)]">
           <div className="space-y-3">
-            <input
+            <Input
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="タイトル"
               autoFocus
-              className="w-full text-sm px-3 py-2 rounded outline-none bg-input border border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
             />
             {config.showCoverUntil && (
               <div>
                 <label className="text-sm block mb-1 text-muted-foreground">カバー期限</label>
-                <DatePicker
-                  value={form.cover_until}
-                  onChange={(v) => setForm((f) => ({ ...f, cover_until: v }))}
-                  placeholder="カバー期限を選択"
-                />
+                <DatePicker value={form.cover_until} onChange={(v) => setForm((f) => ({ ...f, cover_until: v }))} placeholder="カバー期限を選択" />
               </div>
             )}
             <Textarea
@@ -216,22 +195,13 @@ function LayersContent() {
               onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
               placeholder="内容（任意）"
               rows={3}
-              className="text-sm resize-none bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
+              className="resize-none"
             />
             <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setCreateMode(false)}
-                className="text-sm px-3 py-1.5 rounded bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={!form.title.trim() || saving}
-                className="text-sm px-3 py-1.5 rounded disabled:opacity-50 transition-colors bg-primary text-primary-foreground hover:opacity-90"
-              >
+              <Button variant="ghost" onClick={() => setCreateMode(false)}>キャンセル</Button>
+              <Button onClick={handleCreate} disabled={!form.title.trim() || saving}>
                 {saving ? '作成中...' : '作成'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -253,46 +223,37 @@ function LayersContent() {
             return (
               <div
                 key={layer.id}
-                className="rounded-lg p-5 group bg-card"
-                style={{ border: `1px solid ${isEditing ? 'var(--color-primary)' : 'var(--color-border-default)'}` }}
+                className={`rounded-lg p-5 group bg-card border ${isEditing ? 'border-[color:var(--color-primary)]' : 'border-border'}`}
               >
                 {isEditing ? (
                   <div className="space-y-3">
-                    <input
+                    <Input
                       value={form.title}
                       onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                       autoFocus
-                      className="w-full text-sm px-3 py-2 rounded outline-none bg-input border border-ring text-foreground"
                     />
                     {config.showCoverUntil && (
                       <div>
                         <label className="text-sm block mb-1 text-muted-foreground">カバー期限</label>
-                        <DatePicker
-                          value={form.cover_until}
-                          onChange={(v) => setForm((f) => ({ ...f, cover_until: v }))}
-                          placeholder="カバー期限を選択"
-                        />
+                        <DatePicker value={form.cover_until} onChange={(v) => setForm((f) => ({ ...f, cover_until: v }))} placeholder="カバー期限を選択" />
                       </div>
                     )}
                     <Textarea
                       value={form.content}
                       onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
                       rows={4}
-                      className="text-sm resize-none bg-input border-border text-foreground focus:border-ring"
+                      className="resize-none"
                     />
                     <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="p-1.5 rounded text-muted-foreground hover:text-foreground"
-                      >
-                        <X style={{ width: 14, height: 14 }} />
+                      <button onClick={() => setEditingId(null)} className="p-1.5 rounded text-muted-foreground hover:text-foreground">
+                        <X className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleEdit(layer)}
                         disabled={!form.title.trim() || saving}
                         className="p-1.5 rounded disabled:opacity-50 bg-primary text-primary-foreground hover:opacity-90"
                       >
-                        <Check style={{ width: 14, height: 14 }} />
+                        <Check className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -300,44 +261,28 @@ function LayersContent() {
                   <>
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <h3 className="text-sm font-medium text-foreground">{layer.title}</h3>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${healthBadgeClass[health.status]}`}
-                        >
+                        <h3 className="text-sm font-medium">{layer.title}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${HEALTH_BADGE_CLASS[health.status]}`}>
                           {health.label}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => startEdit(layer)}
-                          className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <Pencil style={{ width: 13, height: 13 }} />
+                        <button onClick={() => startEdit(layer)} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors">
+                          <Pencil className="w-3 h-3" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(layer)}
-                          className="p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors"
-                        >
-                          <Trash2 style={{ width: 13, height: 13 }} />
+                        <button onClick={() => handleDelete(layer)} className="p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
                     </div>
-
                     <div className="flex items-center gap-4 mb-2">
-                      <span className="text-xs text-muted-foreground">
-                        最終更新: {formatDate(layer.last_updated_at)}
-                      </span>
+                      <span className="text-xs text-muted-foreground">最終更新: {formatDate(layer.last_updated_at)}</span>
                       {config.showCoverUntil && layer.cover_until && (
-                        <span className="text-xs text-muted-foreground">
-                          カバー期限: {formatDate(layer.cover_until)}
-                        </span>
+                        <span className="text-xs text-muted-foreground">カバー期限: {formatDate(layer.cover_until)}</span>
                       )}
                     </div>
-
                     {layer.content && (
-                      <p className="text-sm leading-relaxed mt-3 whitespace-pre-wrap text-muted-foreground">
-                        {layer.content}
-                      </p>
+                      <p className="text-sm leading-relaxed mt-3 whitespace-pre-wrap text-muted-foreground">{layer.content}</p>
                     )}
                   </>
                 )}

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { DesignTokens, AppLayout, Toaster } from '@takaki/go-design-system'
 import { TaskGoSidebar } from '@/components/layout/sidebar'
+import { DarkModeInit } from '@/components/ui/dark-mode-init'
 import { createClient } from '@/lib/supabase/server'
 
 const inter = Inter({
@@ -31,11 +32,12 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <DarkModeInit />
         <DesignTokens primaryColor="#5E6AD2" primaryColorHover="#4F5BC0" />
       </head>
       <body className="min-h-full">
         {user ? (
-          <AppLayout sidebar={<TaskGoSidebar />}>
+          <AppLayout sidebar={<TaskGoSidebar />} mainClassName="overflow-auto">
             {children}
           </AppLayout>
         ) : (
