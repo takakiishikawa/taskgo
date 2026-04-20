@@ -52,11 +52,10 @@ const TAB_CONFIG: Record<TabType, {
   },
 }
 
-const healthColors = { green: '#30A46C', yellow: '#F5A623', red: '#E5484D' }
-const healthBg = {
-  green: 'rgba(48,164,108,0.1)',
-  yellow: 'rgba(245,166,35,0.1)',
-  red: 'rgba(229,72,77,0.1)',
+const healthBadgeClass = {
+  green: 'bg-success-subtle text-success',
+  yellow: 'bg-warning-subtle text-warning',
+  red: 'bg-danger-subtle text-destructive',
 }
 
 function LayersContent() {
@@ -167,10 +166,7 @@ function LayersContent() {
         </div>
         <button
           onClick={() => { setCreateMode(true); setEditingId(null); setForm({ title: '', content: '', cover_until: undefined }) }}
-          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded transition-colors"
-          style={{ background: '#5E6AD2', color: '#FFFFFF' }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#4F5BC0')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = '#5E6AD2')}
+          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded transition-colors bg-primary text-primary-foreground hover:opacity-90"
         >
           <Plus style={{ width: 13, height: 13 }} />
           新規ドキュメント
@@ -186,7 +182,7 @@ function LayersContent() {
             className="text-sm px-4 py-2.5 transition-colors -mb-px"
             style={{
               color: activeTab === tab ? 'var(--foreground)' : 'var(--muted-foreground)',
-              borderBottom: activeTab === tab ? '2px solid #5E6AD2' : '2px solid transparent',
+              borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
             }}
           >
             {TAB_CONFIG[tab].label}
@@ -196,7 +192,7 @@ function LayersContent() {
 
       {/* Create form */}
       {createMode && (
-        <div className="rounded-lg p-5 mb-4 bg-card" style={{ border: '1px solid #5E6AD2' }}>
+        <div className="rounded-lg p-5 mb-4 bg-card border border-[color:var(--color-primary)]">
           <div className="space-y-3">
             <input
               value={form.title}
@@ -232,8 +228,7 @@ function LayersContent() {
               <button
                 onClick={handleCreate}
                 disabled={!form.title.trim() || saving}
-                className="text-sm px-3 py-1.5 rounded disabled:opacity-50 transition-colors"
-                style={{ background: '#5E6AD2', color: '#FFFFFF' }}
+                className="text-sm px-3 py-1.5 rounded disabled:opacity-50 transition-colors bg-primary text-primary-foreground hover:opacity-90"
               >
                 {saving ? '作成中...' : '作成'}
               </button>
@@ -259,7 +254,7 @@ function LayersContent() {
               <div
                 key={layer.id}
                 className="rounded-lg p-5 group bg-card"
-                style={{ border: `1px solid ${isEditing ? '#5E6AD2' : 'var(--border)'}` }}
+                style={{ border: `1px solid ${isEditing ? 'var(--color-primary)' : 'var(--color-border-default)'}` }}
               >
                 {isEditing ? (
                   <div className="space-y-3">
@@ -295,8 +290,7 @@ function LayersContent() {
                       <button
                         onClick={() => handleEdit(layer)}
                         disabled={!form.title.trim() || saving}
-                        className="p-1.5 rounded disabled:opacity-50"
-                        style={{ background: '#5E6AD2', color: '#FFFFFF' }}
+                        className="p-1.5 rounded disabled:opacity-50 bg-primary text-primary-foreground hover:opacity-90"
                       >
                         <Check style={{ width: 14, height: 14 }} />
                       </button>
@@ -308,11 +302,7 @@ function LayersContent() {
                       <div className="flex items-center gap-3">
                         <h3 className="text-sm font-medium text-foreground">{layer.title}</h3>
                         <span
-                          className="text-xs px-2 py-0.5 rounded-full"
-                          style={{
-                            background: healthBg[health.status],
-                            color: healthColors[health.status],
-                          }}
+                          className={`text-xs px-2 py-0.5 rounded-full ${healthBadgeClass[health.status]}`}
                         >
                           {health.label}
                         </span>

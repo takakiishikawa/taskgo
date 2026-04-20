@@ -138,7 +138,7 @@ export default function FocusPage() {
               className="relative flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors"
               style={{
                 color: activeTab === offset ? 'var(--foreground)' : 'var(--muted-foreground)',
-                borderBottom: activeTab === offset ? '2px solid #5E6AD2' : '2px solid transparent',
+                borderBottom: activeTab === offset ? '2px solid var(--color-primary)' : '2px solid transparent',
                 marginBottom: -1,
               }}
             >
@@ -147,8 +147,8 @@ export default function FocusPage() {
                 <span
                   className="text-xs px-1.5 py-0.5 rounded-full"
                   style={{
-                    background: doneCount === count ? 'rgba(48,164,108,0.15)' : 'var(--accent)',
-                    color: doneCount === count ? '#30A46C' : 'var(--muted-foreground)',
+                    background: doneCount === count ? 'color-mix(in srgb, var(--color-success) 15%, transparent)' : 'var(--accent)',
+                    color: doneCount === count ? 'var(--color-success)' : 'var(--muted-foreground)',
                     fontSize: 10,
                   }}
                 >
@@ -183,7 +183,7 @@ export default function FocusPage() {
                 className="flex-shrink-0 transition-colors"
               >
                 {wfTask.is_done
-                  ? <CheckCircle2 style={{ width: 16, height: 16, color: '#30A46C' }} />
+                  ? <CheckCircle2 className="text-success" style={{ width: 16, height: 16 }} />
                   : <Circle style={{ width: 16, height: 16, color: 'var(--muted-foreground)' }} />
                 }
               </button>
@@ -237,16 +237,7 @@ export default function FocusPage() {
       {currentFocus.length < 5 && (
         <button
           onClick={openAddDialog}
-          className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors"
-          style={{ border: '1px solid var(--border)', color: 'var(--muted-foreground)' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#5E6AD2'
-            e.currentTarget.style.color = '#5E6AD2'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'var(--border)'
-            e.currentTarget.style.color = 'var(--muted-foreground)'
-          }}
+          className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors border-border text-muted-foreground hover:border-[color:var(--color-primary)] hover:text-primary"
         >
           <Plus style={{ width: 13, height: 13 }} />
           タスクを追加（{currentFocus.length}/5）

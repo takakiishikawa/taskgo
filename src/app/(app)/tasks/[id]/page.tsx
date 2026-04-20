@@ -315,8 +315,7 @@ export default function TaskDetailPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="text-sm px-2.5 py-1.5 rounded disabled:opacity-50 transition-colors"
-                  style={{ background: '#5E6AD2', color: '#FFFFFF' }}
+                  className="text-sm px-2.5 py-1.5 rounded disabled:opacity-50 transition-colors bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saving ? '保存中...' : '保存'}
                 </button>
@@ -409,7 +408,7 @@ export default function TaskDetailPage() {
               className="text-sm resize-none bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-ring"
             />
           ) : (
-            <p className="text-sm leading-relaxed" style={{ color: task.description ? 'var(--muted-foreground)' : 'var(--border)' }}>
+            <p className={`text-sm leading-relaxed ${task.description ? 'text-muted-foreground' : 'text-border'}`}>
               {task.description || '説明なし'}
             </p>
           )}
@@ -417,13 +416,13 @@ export default function TaskDetailPage() {
 
         {/* Output note (if done) */}
         {task.status === 'done' && (
-          <div className="mb-4 rounded p-3 border" style={{ background: 'rgba(48,164,108,0.06)', borderColor: 'rgba(48,164,108,0.2)' }}>
-            <label className="text-sm block mb-1 font-medium" style={{ color: '#30A46C' }}>アウトプット記録</label>
+          <div className="mb-4 rounded p-3 border bg-success-subtle border-[color:var(--color-success)]/20">
+            <label className="text-sm block mb-1 font-medium text-success">アウトプット記録</label>
             <p className="text-sm text-muted-foreground">
               {task.output_note || '（記録なし）'}
             </p>
             {task.completed_at && (
-              <p className="text-xs mt-1" style={{ color: '#30A46C', opacity: 0.7 }}>
+              <p className="text-xs mt-1 text-success/70">
                 {new Date(task.completed_at).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 完了
               </p>
             )}
@@ -481,10 +480,7 @@ export default function TaskDetailPage() {
             <button
               onClick={handleSuggestTags}
               disabled={tagSuggesting}
-              className="flex items-center gap-1 text-sm px-2 py-0.5 rounded transition-colors disabled:opacity-50"
-              style={{ color: '#5E6AD2', border: '1px solid rgba(94,106,210,0.3)', background: 'transparent' }}
-              onMouseEnter={(e) => { if (!tagSuggesting) e.currentTarget.style.background = 'rgba(94,106,210,0.1)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+              className="flex items-center gap-1 text-sm px-2 py-0.5 rounded transition-colors disabled:opacity-50 text-primary border border-[color:var(--color-primary)]/30 bg-transparent hover:bg-[color:var(--color-primary)]/10"
             >
               <Sparkles style={{ width: 10, height: 10 }} />
               {tagSuggesting ? '提案中...' : 'AI提案'}
@@ -497,7 +493,7 @@ export default function TaskDetailPage() {
       {isIssuetask && (
         <div className="rounded-lg p-5 mb-6 bg-card border border-border">
           <h3 className="text-sm font-medium mb-3 flex items-center gap-2 text-muted-foreground">
-            <AlertTriangle style={{ width: 12, height: 12, color: '#F5A623' }} />
+            <AlertTriangle className="text-warning" style={{ width: 12, height: 12 }} />
             課題発見AI
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
@@ -509,10 +505,7 @@ export default function TaskDetailPage() {
           <button
             onClick={handleIssueDiscovery}
             disabled={aiLoading !== null}
-            className="flex items-center gap-2 text-sm px-4 py-2.5 rounded transition-colors disabled:opacity-50"
-            style={{ background: 'rgba(245,166,35,0.12)', color: '#D97706', border: '1px solid rgba(245,166,35,0.3)' }}
-            onMouseEnter={(e) => { if (!aiLoading) e.currentTarget.style.background = 'rgba(245,166,35,0.2)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(245,166,35,0.12)' }}
+            className="flex items-center gap-2 text-sm px-4 py-2.5 rounded transition-colors disabled:opacity-50 bg-warning-subtle text-warning border border-[color:var(--color-warning)]/30 hover:bg-[color:var(--color-warning)]/20"
           >
             <Sparkles style={{ width: 12, height: 12 }} />
             {aiLoading === 'issues' ? '分析中...' : '課題を発見する'}
@@ -524,17 +517,14 @@ export default function TaskDetailPage() {
       {!isIssuetask && (
         <div className="rounded-lg p-5 mb-6 bg-card border border-border">
           <h3 className="text-sm font-medium mb-4 flex items-center gap-2 text-muted-foreground">
-            <Sparkles style={{ width: 12, height: 12, color: '#5E6AD2' }} />
+            <Sparkles className="text-primary" style={{ width: 12, height: 12 }} />
             AIサジェスト
           </h3>
           <div className="flex gap-3">
             <button
               onClick={() => handleAiSuggest('first_step')}
               disabled={aiLoading !== null}
-              className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors disabled:opacity-50"
-              style={{ border: '1px solid #5E6AD2', color: '#5E6AD2', background: 'transparent' }}
-              onMouseEnter={(e) => { if (!aiLoading) e.currentTarget.style.background = 'rgba(94,106,210,0.1)' }}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors disabled:opacity-50 border-[color:var(--color-primary)] text-primary bg-transparent hover:bg-[color:var(--color-primary)]/10"
             >
               <Sparkles style={{ width: 12, height: 12 }} />
               {aiLoading === 'first_step' ? '提案中...' : '次の一手を提案してもらう'}
@@ -565,17 +555,11 @@ export default function TaskDetailPage() {
               <div key={s.id} className="rounded-lg p-4 bg-card border border-border">
                 <div className="flex items-center justify-between mb-2">
                   <span
-                    className="text-xs px-2 py-0.5 rounded"
-                    style={{
-                      background:
-                        s.suggestion_type === 'first_step' ? 'rgba(94,106,210,0.15)'
-                        : s.suggestion_type === 'issues' ? 'rgba(245,166,35,0.15)'
-                        : 'var(--secondary)',
-                      color:
-                        s.suggestion_type === 'first_step' ? '#5E6AD2'
-                        : s.suggestion_type === 'issues' ? '#D97706'
-                        : 'var(--muted-foreground)',
-                    }}
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      s.suggestion_type === 'first_step' ? 'bg-[color:var(--color-primary)]/15 text-primary'
+                      : s.suggestion_type === 'issues' ? 'bg-warning-subtle text-warning'
+                      : 'bg-secondary text-muted-foreground'
+                    }`}
                   >
                     {s.suggestion_type === 'first_step' ? '次の一手'
                       : s.suggestion_type === 'issues' ? '課題発見'

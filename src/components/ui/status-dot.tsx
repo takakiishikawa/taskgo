@@ -2,12 +2,12 @@ import { cn } from '@/lib/utils'
 
 type StatusVariant = 'green' | 'yellow' | 'red' | 'gray' | 'blue'
 
-const colorMap: Record<StatusVariant, string> = {
-  green: '#30A46C',
-  yellow: '#F5A623',
-  red: '#E5484D',
-  gray: '#6B6B6B',
-  blue: '#5E6AD2',
+const dotClass: Record<StatusVariant, string> = {
+  green: 'bg-success',
+  yellow: 'bg-warning',
+  red: 'bg-danger',
+  gray: 'bg-[color:var(--color-text-subtle)]',
+  blue: 'bg-primary',
 }
 
 interface StatusDotProps {
@@ -20,11 +20,11 @@ export function StatusDot({ variant, label, className }: StatusDotProps) {
   return (
     <span className={cn('inline-flex items-center gap-1.5', className)}>
       <span
-        className="inline-block rounded-full flex-shrink-0"
-        style={{ width: 6, height: 6, background: colorMap[variant] }}
+        className={cn('inline-block rounded-full flex-shrink-0', dotClass[variant])}
+        style={{ width: 6, height: 6 }}
       />
       {label && (
-        <span className="text-sm" style={{ color: '#6B6B6B' }}>
+        <span className="text-sm text-muted-foreground">
           {label}
         </span>
       )}
@@ -32,4 +32,4 @@ export function StatusDot({ variant, label, className }: StatusDotProps) {
   )
 }
 
-export { colorMap as statusColors }
+export { dotClass as statusDotClass }

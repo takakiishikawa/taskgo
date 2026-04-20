@@ -219,12 +219,9 @@ export default function TasksPage() {
         </div>
         <button
           onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded transition-colors"
-          style={{ background: '#5E6AD2', color: '#FFFFFF' }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#4F5BC0')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = '#5E6AD2')}
+          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded transition-colors bg-primary text-primary-foreground hover:opacity-90"
         >
-          <Plus style={{ width: 13, height: 13 }} />
+          <Plus className="w-3 h-3" />
           新規タスク
         </button>
       </div>
@@ -386,10 +383,7 @@ export default function TasksPage() {
               <button
                 onClick={handleCreate}
                 disabled={!form.title.trim() || creating}
-                className="text-sm px-3 py-2 rounded transition-colors disabled:opacity-50"
-                style={{ background: '#5E6AD2', color: '#FFFFFF' }}
-                onMouseEnter={(e) => !creating && (e.currentTarget.style.background = '#4F5BC0')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#5E6AD2')}
+                className="text-sm px-3 py-2 rounded transition-colors disabled:opacity-50 bg-primary text-primary-foreground hover:opacity-90"
               >
                 {creating ? '作成中...' : '作成'}
               </button>
@@ -438,11 +432,11 @@ function TaskRow({
         title={task.is_focus ? 'フォーカスから外す' : 'フォーカスに追加'}
       >
         <Star
+          className={task.is_focus ? 'text-warning' : 'text-border'}
           style={{
             width: 14,
             height: 14,
-            color: task.is_focus ? '#F5A623' : 'var(--border)',
-            fill: task.is_focus ? '#F5A623' : 'none',
+            fill: task.is_focus ? 'currentColor' : 'none',
           }}
         />
       </button>

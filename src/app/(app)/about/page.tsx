@@ -8,7 +8,7 @@ export default function AboutPage() {
         <div className="flex items-center gap-3 mb-4">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #5E6AD2 0%, #7B87E3 100%)' }}
+            style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 70%, #ffffff) 100%)' }}
           >
             <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
           </div>
@@ -54,13 +54,13 @@ export default function AboutPage() {
               className="rounded-lg p-4"
               style={{
                 background: 'var(--card)',
-                border: item.accent ? '1px solid rgba(94,106,210,0.4)' : '1px solid var(--border)',
+                border: item.accent ? '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)' : '1px solid var(--border)',
               }}
             >
               <div className="flex items-start gap-3">
                 <span
                   className="text-xs font-mono font-bold flex-shrink-0 mt-0.5"
-                  style={{ color: item.accent ? '#5E6AD2' : 'var(--muted-foreground)' }}
+                  style={{ color: item.accent ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
                 >
                   {item.num}
                 </span>
@@ -99,7 +99,7 @@ export default function AboutPage() {
               className="rounded-lg p-4"
               style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
             >
-              <Icon className="w-4 h-4 mb-2" style={{ color: '#5E6AD2' }} />
+              <Icon className="w-4 h-4 mb-2 text-primary" />
               <p className="text-sm font-medium text-foreground mb-1.5">{title}</p>
               <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
             </div>
@@ -139,8 +139,7 @@ export default function AboutPage() {
             >
               <div className="flex-shrink-0">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: 'rgba(94,106,210,0.15)', color: '#5E6AD2' }}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-[color:var(--color-primary)]/15 text-primary"
                 >
                   {i + 1}
                 </div>
@@ -161,8 +160,7 @@ export default function AboutPage() {
       {/* 設計の理想状態 */}
       <Section title="目指す理想状態">
         <div
-          className="rounded-lg p-5"
-          style={{ background: 'rgba(94,106,210,0.06)', border: '1px solid rgba(94,106,210,0.2)' }}
+          className="rounded-lg p-5 bg-[color:var(--color-primary)]/6 border border-[color:var(--color-primary)]/20"
         >
           <ul className="space-y-2">
             {[
@@ -172,7 +170,7 @@ export default function AboutPage() {
               'この「貯金残高」が常に可視化されていて、減ったら補充できる',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span style={{ color: '#30A46C' }} className="mt-0.5 flex-shrink-0">✓</span>
+                <span className="text-success mt-0.5 flex-shrink-0">✓</span>
                 {item}
               </li>
             ))}
