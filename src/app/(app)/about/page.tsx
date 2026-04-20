@@ -1,27 +1,26 @@
 import { Zap, Target, Clock, Brain, ChevronRight } from 'lucide-react'
+import { PageHeader, Section } from '@takaki/go-design-system'
 
 export default function AboutPage() {
   return (
-    <div className="px-8 py-8 max-w-2xl">
-      {/* Hero */}
-      <div className="mb-10">
-        <div className="flex items-center gap-3 mb-4">
+    <div className="px-8 py-8 max-w-2xl space-y-8">
+      <PageHeader
+        title="TaskGo"
+        description="PdMの設計貯金を守るツール"
+        actions={
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 70%, #ffffff) 100%)' }}
           >
             <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">TaskGo</h1>
-            <p className="text-xs text-muted-foreground">PdMの設計貯金を守るツール</p>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          TaskGoはタスクを記録・管理するためのツールではありません。<br />
-          <span className="text-foreground font-medium">PdMが設計系タスクを先回りして実行し続ける構造を作る</span>ためのツールです。
-        </p>
-      </div>
+        }
+      />
+
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        TaskGoはタスクを記録・管理するためのツールではありません。<br />
+        <span className="text-foreground font-medium">PdMが設計系タスクを先回りして実行し続ける構造を作る</span>ためのツールです。
+      </p>
 
       {/* 解決する課題 */}
       <Section title="解決する4つの課題">
@@ -51,17 +50,11 @@ export default function AboutPage() {
           ].map((item) => (
             <div
               key={item.num}
-              className="rounded-lg p-4"
-              style={{
-                background: 'var(--card)',
-                border: item.accent ? '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)' : '1px solid var(--border)',
-              }}
+              className="rounded-lg p-4 bg-card"
+              style={{ border: item.accent ? '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)' : '1px solid var(--border)' }}
             >
               <div className="flex items-start gap-3">
-                <span
-                  className="text-xs font-mono font-bold flex-shrink-0 mt-0.5"
-                  style={{ color: item.accent ? 'var(--color-primary)' : 'var(--muted-foreground)' }}
-                >
+                <span className="text-xs font-mono font-bold shrink-0 mt-0.5" style={{ color: item.accent ? 'var(--color-primary)' : 'var(--muted-foreground)' }}>
                   {item.num}
                 </span>
                 <div>
@@ -94,11 +87,7 @@ export default function AboutPage() {
               body: '止まっているタスクに対してAIが「次の一手」を提案。初動ハードルを下げて、先送りを構造的に減らす。',
             },
           ].map(({ icon: Icon, title, body }) => (
-            <div
-              key={title}
-              className="rounded-lg p-4"
-              style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-            >
+            <div key={title} className="rounded-lg p-4 bg-card border border-border">
               <Icon className="w-4 h-4 mb-2 text-primary" />
               <p className="text-sm font-medium text-foreground mb-1.5">{title}</p>
               <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
@@ -132,15 +121,9 @@ export default function AboutPage() {
               detail: 'ダッシュボードの残高カードが黄・赤になったら設計レイヤーを更新するサイン。設計の貯金を常に緑の状態に保つことで、開発チームへの滞りない供給が実現します。',
             },
           ].map((item, i) => (
-            <div
-              key={item.step}
-              className="flex gap-3 rounded-lg p-4"
-              style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-            >
-              <div className="flex-shrink-0">
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-[color:var(--color-primary)]/15 text-primary"
-                >
+            <div key={item.step} className="flex gap-3 rounded-lg p-4 bg-card border border-border">
+              <div className="shrink-0">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-[color:var(--color-primary)]/15 text-primary">
                   {i + 1}
                 </div>
               </div>
@@ -157,11 +140,9 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      {/* 設計の理想状態 */}
+      {/* 目指す理想状態 */}
       <Section title="目指す理想状態">
-        <div
-          className="rounded-lg p-5 bg-[color:var(--color-primary)]/6 border border-[color:var(--color-primary)]/20"
-        >
+        <div className="rounded-lg p-5 bg-[color:var(--color-primary)]/6 border border-[color:var(--color-primary)]/20">
           <ul className="space-y-2">
             {[
               'ロードマップが常に今から1年以上先までカバーされている',
@@ -170,7 +151,7 @@ export default function AboutPage() {
               'この「貯金残高」が常に可視化されていて、減ったら補充できる',
             ].map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="text-success mt-0.5 flex-shrink-0">✓</span>
+                <span className="text-success mt-0.5 shrink-0">✓</span>
                 {item}
               </li>
             ))}
@@ -178,23 +159,9 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      {/* Footer */}
-      <div className="mt-8 pt-6 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          TaskGo — NativeGo / CareGo / KenyakuGo シリーズ
-        </p>
+      <div className="pt-2 border-t border-border">
+        <p className="text-xs text-muted-foreground">TaskGo — NativeGo / CareGo / KenyakuGo シリーズ</p>
       </div>
     </div>
-  )
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-8">
-      <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
-        {title}
-      </h2>
-      {children}
-    </section>
   )
 }

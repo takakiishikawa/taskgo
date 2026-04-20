@@ -10,7 +10,7 @@ import { OutputModal } from '@/components/ui/output-modal'
 import { formatDate } from '@/lib/date'
 import { LAYER_LABELS, LAYER_ORDER, STATUS_LABEL, STATUS_DOT } from '@/lib/constants'
 import {
-  Button, Input,
+  Button, Input, PageHeader, EmptyState,
   Dialog, DialogContent, DialogHeader, DialogTitle,
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
   Textarea,
@@ -163,21 +163,20 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="px-8 py-8 max-w-4xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-lg font-semibold">タスク</h2>
-          <p className="text-xs mt-1 text-muted-foreground">設計タスクを管理する</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5">
-          <Plus className="w-3 h-3" />
-          新規タスク
-        </Button>
-      </div>
+    <div className="px-8 py-8 max-w-4xl space-y-6">
+      <PageHeader
+        title="タスク"
+        description="設計タスクを管理する"
+        actions={
+          <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5">
+            <Plus className="w-3 h-3" />
+            新規タスク
+          </Button>
+        }
+      />
 
-      {/* Filters */}
-      <div className="flex items-center gap-3 mb-6 flex-wrap">
+      {/* フィルター */}
+      <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-1">
           {(['all', 'pending', 'in_progress', 'done'] as const).map((s) => (
             <button
@@ -219,7 +218,7 @@ export default function TasksPage() {
         )}
       </div>
 
-      {/* Task groups */}
+      {/* タスクグループ */}
       <div className="space-y-6">
         {LAYER_ORDER.map((layer) => {
           const layerTasks = groupedTasks[layer]
@@ -252,13 +251,15 @@ export default function TasksPage() {
         })}
 
         {filteredTasks.length === 0 && (
-          <div className="rounded-lg border border-border bg-card px-5 py-10 text-center">
-            <p className="text-sm text-muted-foreground">タスクがありません</p>
-          </div>
+          <EmptyState
+            title="タスクがありません"
+            description="新規タスクを作成して設計を始めましょう"
+            action={{ label: '新規タスクを作成', onClick: () => setCreateOpen(true) }}
+          />
         )}
       </div>
 
-      {/* Create dialog */}
+      {/* 新規タスクダイアログ */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
@@ -275,7 +276,6 @@ export default function TasksPage() {
                 autoFocus
               />
             </div>
-
             <div>
               <label className="text-sm block mb-1.5 text-muted-foreground">レイヤー</label>
               <Select value={form.layer_type} onValueChange={(v) => setForm((f) => ({ ...f, layer_type: v as LayerType }))}>
@@ -289,12 +289,10 @@ export default function TasksPage() {
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <label className="text-sm block mb-1.5 text-muted-foreground">期日</label>
               <DatePicker value={form.due_date} onChange={(v) => setForm((f) => ({ ...f, due_date: v }))} />
             </div>
-
             <div>
               <label className="text-sm block mb-1.5 text-muted-foreground">説明</label>
               <Textarea
@@ -305,7 +303,6 @@ export default function TasksPage() {
                 rows={3}
               />
             </div>
-
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="ghost" onClick={() => setCreateOpen(false)}>キャンセル</Button>
               <Button onClick={handleCreate} disabled={!form.title.trim() || creating}>
@@ -340,7 +337,7 @@ function TaskRow({
     <div className={`flex items-center gap-3 px-4 py-3 group ${isLast ? '' : 'border-b border-border'}`}>
       <button
         onClick={() => onToggleFocus(task)}
-        className="flex-shrink-0 transition-colors"
+        className="shrink-0 transition-colors"
         title={task.is_focus ? 'フォーカスから外す' : 'フォーカスに追加'}
       >
         <Star
@@ -361,10 +358,10 @@ function TaskRow({
       </Link>
 
       {task.due_date && (
-        <span className="text-xs flex-shrink-0 text-muted-foreground">{formatDate(task.due_date)}</span>
+        <span className="text-xs shrink-0 text-muted-foreground">{formatDate(task.due_date)}</span>
       )}
 
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <select
           value={task.status}
           onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
@@ -376,7 +373,7 @@ function TaskRow({
         </select>
       </div>
 
-      <StatusDot variant={STATUS_DOT[task.status]} className="flex-shrink-0" />
+      <StatusDot variant={STATUS_DOT[task.status]} className="shrink-0" />
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <Link href={`/tasks/${task.id}`} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">

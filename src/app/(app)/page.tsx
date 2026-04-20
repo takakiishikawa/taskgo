@@ -11,7 +11,7 @@ import type { Task, DesignLayer, WeeklySummary } from '@/types/database'
 import { StatusDot } from '@/components/ui/status-dot'
 import { OutputModal } from '@/components/ui/output-modal'
 import { formatDate, getDaysAgo, getMonthsFromNow, getWeekStart, isFriday } from '@/lib/date'
-import { Button } from '@takaki/go-design-system'
+import { Button, PageHeader, Section, EmptyState } from '@takaki/go-design-system'
 import { HEALTH_BADGE_CLASS } from '@/lib/constants'
 import {
   CheckCircle2, Circle, ChevronRight, Sparkles, RefreshCw,
@@ -178,24 +178,17 @@ export default function DashboardPage() {
   const sdHealth = getSpecDesignHealth(layers.spec_design)
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
-        読み込み中...
-      </div>
-    )
+    return <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">読み込み中...</div>
   }
 
   return (
-    <div className="px-8 py-8 max-w-5xl">
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold">ダッシュボード</h2>
-        <p className="text-xs mt-1 text-muted-foreground">設計貯金の状態を確認する</p>
-      </div>
+    <div className="px-8 py-8 max-w-5xl space-y-8">
+      <PageHeader title="ダッシュボード" description="設計貯金の状態を確認する" />
 
-      {/* New recurring tasks banner */}
+      {/* 通知バナー */}
       {newRecurring.length > 0 && (
-        <div className="rounded p-4 mb-6 flex items-start gap-3 bg-warning-subtle border border-[color:var(--color-warning)]/30">
-          <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" />
+        <div className="rounded-lg p-4 flex items-start gap-3 bg-warning-subtle border border-[color:var(--color-warning)]/30">
+          <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-warning">課題発見タスクが生成されました</p>
             <div className="mt-1 space-y-0.5">
@@ -208,31 +201,28 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-
-      {/* Friday banner */}
       {isFridayBanner && (
-        <div className="rounded p-4 mb-6 flex items-center justify-between bg-[color:var(--color-primary)]/8 border border-[color:var(--color-primary)]/25">
+        <div className="rounded-lg p-4 flex items-center justify-between bg-[color:var(--color-primary)]/8 border border-[color:var(--color-primary)]/25">
           <div className="flex items-center gap-3">
-            <FileText className="w-3.5 h-3.5 text-primary shrink-0" />
+            <FileText className="w-4 h-4 text-primary shrink-0" />
             <div>
               <p className="text-sm font-medium text-primary">金曜日です！今週を振り返りましょう</p>
               <p className="text-xs text-muted-foreground mt-0.5">週次サマリーを生成して今週の成果を記録しましょう</p>
             </div>
           </div>
           <Button size="sm" onClick={handleGenerateSummary} disabled={summaryLoading} className="shrink-0 gap-1.5">
-            <Sparkles className="w-2.5 h-2.5" />
+            <Sparkles className="w-3 h-3" />
             {summaryLoading ? '生成中...' : 'サマリー生成'}
           </Button>
         </div>
       )}
 
       {/* 設計貯金残高 */}
-      <section className="mb-8">
-        <h3 className="text-xs font-medium mb-3 uppercase tracking-wider text-muted-foreground">設計貯金残高</h3>
+      <Section title="設計貯金残高">
         <div className="grid grid-cols-3 gap-4">
           {[
-            { title: 'コアバリュー',   health: cvHealth, sub: '90日以内更新で健康',  href: '/layers?tab=core_value' },
-            { title: 'ロードマップ',   health: rmHealth, sub: '2年以上カバーで健康',  href: '/layers?tab=roadmap' },
+            { title: 'コアバリュー',   health: cvHealth, sub: '90日以内更新で健康',   href: '/layers?tab=core_value' },
+            { title: 'ロードマップ',   health: rmHealth, sub: '2年以上カバーで健康',   href: '/layers?tab=roadmap' },
             { title: '仕様・デザイン', health: sdHealth, sub: '6ヶ月以上カバーで健康', href: '/layers?tab=spec_design' },
           ].map(({ title, health, sub, href }) => (
             <Link key={title} href={href} className="block rounded-lg p-5 transition-colors bg-card border border-border hover:bg-accent/30">
@@ -243,32 +233,29 @@ export default function DashboardPage() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">{health.label}</p>
-              <p className="text-xs mt-1 text-muted-foreground/50">{sub}</p>
+              <p className="text-xs mt-1 text-muted-foreground/60">{sub}</p>
             </Link>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* 今週のフォーカス */}
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Target className="w-3 h-3" />
-            今週のフォーカス
-          </h3>
+      <Section
+        title="今週のフォーカス"
+        actions={
           <Link href="/focus" className="text-sm flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
-            フォーカスを管理 <ChevronRight className="w-3 h-3" />
+            管理する <ChevronRight className="w-3 h-3" />
           </Link>
-        </div>
-
+        }
+      >
         <div className="rounded-lg overflow-hidden bg-card border border-border">
           {weeklyFocusTasks.length === 0 ? (
-            <div className="px-5 py-6 text-center">
-              <p className="text-sm text-muted-foreground">今週のフォーカスタスクがありません</p>
-              <Link href="/focus" className="inline-block mt-2 text-sm text-primary hover:opacity-80 transition-opacity">
-                フォーカス管理から設定する
-              </Link>
-            </div>
+            <EmptyState
+              icon={<Target className="w-5 h-5" />}
+              title="今週のフォーカスがありません"
+              description="フォーカス管理からタスクを設定しましょう"
+              action={{ label: 'フォーカスを設定する', onClick: () => { window.location.href = '/focus' } }}
+            />
           ) : (
             weeklyFocusTasks.map((wfTask, i) => (
               <div
@@ -290,7 +277,7 @@ export default function DashboardPage() {
                     {wfTask.task.title}
                   </span>
                 </Link>
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-3 shrink-0">
                   <StatusDot
                     variant={wfTask.task.status === 'done' ? 'green' : wfTask.task.status === 'in_progress' ? 'blue' : 'gray'}
                     label={wfTask.task.status === 'done' ? '完了' : wfTask.task.status === 'in_progress' ? '進行中' : '未着手'}
@@ -303,15 +290,12 @@ export default function DashboardPage() {
             ))
           )}
         </div>
-      </section>
+      </Section>
 
       {/* 週次サマリー */}
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <FileText className="w-3 h-3" />
-            今週のサマリー
-          </h3>
+      <Section
+        title="今週のサマリー"
+        actions={
           <button
             onClick={handleGenerateSummary}
             disabled={summaryLoading}
@@ -320,8 +304,8 @@ export default function DashboardPage() {
             <RefreshCw className={`w-3 h-3 ${summaryLoading ? 'animate-spin' : ''}`} />
             {weeklySummary ? '再生成' : '生成する'}
           </button>
-        </div>
-
+        }
+      >
         <div className="rounded-lg p-5 bg-card border border-border">
           {summaryLoading ? (
             <div className="space-y-2">
@@ -335,16 +319,13 @@ export default function DashboardPage() {
             <p className="text-sm text-muted-foreground">今週完了したタスクのアウトプットをもとにAIがサマリーを生成します</p>
           )}
         </div>
-      </section>
+      </Section>
 
       {/* AIサジェスト */}
       {stalestTask && (
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider flex items-center gap-2 text-muted-foreground">
-              <Sparkles className="w-3 h-3 text-primary" />
-              AIサジェスト
-            </h3>
+        <Section
+          title="AIサジェスト"
+          actions={
             <button
               onClick={handleFetchAiSuggestion}
               disabled={loadingAi}
@@ -353,8 +334,8 @@ export default function DashboardPage() {
               <RefreshCw className={`w-3 h-3 ${loadingAi ? 'animate-spin' : ''}`} />
               再取得
             </button>
-          </div>
-
+          }
+        >
           <div className="rounded-lg p-5 bg-card border border-border">
             <div className="flex items-start justify-between mb-3">
               <div>
@@ -365,7 +346,6 @@ export default function DashboardPage() {
                 詳しく聞く <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
-
             {loadingAi ? (
               <div className="mt-3 space-y-2">
                 {[60, 80, 40].map((w, i) => (
@@ -378,7 +358,7 @@ export default function DashboardPage() {
               </div>
             ) : null}
           </div>
-        </section>
+        </Section>
       )}
 
       <OutputModal

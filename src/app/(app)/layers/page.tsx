@@ -6,9 +6,9 @@ import { getDesignLayers, upsertDesignLayer, deleteDesignLayer } from '@/lib/db'
 import type { DesignLayer } from '@/types/database'
 import { formatDate, getMonthsFromNow, getDaysAgo } from '@/lib/date'
 import { HEALTH_BADGE_CLASS } from '@/lib/constants'
-import { Button, Input, Textarea } from '@takaki/go-design-system'
+import { Button, Input, Textarea, PageHeader, EmptyState } from '@takaki/go-design-system'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Check, X, Layers } from 'lucide-react'
 import { toast } from 'sonner'
 import { Suspense } from 'react'
 
@@ -140,25 +140,24 @@ function LayersContent() {
   const config = TAB_CONFIG[activeTab]
 
   return (
-    <div className="px-8 py-8 max-w-4xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-lg font-semibold">設計レイヤー</h2>
-          <p className="text-xs mt-1 text-muted-foreground">設計の貯金残高を管理する</p>
-        </div>
-        <Button
-          size="sm"
-          className="gap-1.5"
-          onClick={() => { setCreateMode(true); setEditingId(null); setForm({ title: '', content: '', cover_until: undefined }) }}
-        >
-          <Plus className="w-3 h-3" />
-          新規ドキュメント
-        </Button>
-      </div>
+    <div className="px-8 py-8 max-w-4xl space-y-6">
+      <PageHeader
+        title="設計レイヤー"
+        description="設計の貯金残高を管理する"
+        actions={
+          <Button
+            size="sm"
+            className="gap-1.5"
+            onClick={() => { setCreateMode(true); setEditingId(null); setForm({ title: '', content: '', cover_until: undefined }) }}
+          >
+            <Plus className="w-3 h-3" />
+            新規ドキュメント
+          </Button>
+        }
+      />
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 mb-6 border-b border-border">
+      {/* タブ */}
+      <div className="flex items-center gap-1 border-b border-border">
         {(Object.keys(TAB_CONFIG) as TabType[]).map((tab) => (
           <button
             key={tab}
@@ -174,9 +173,9 @@ function LayersContent() {
         ))}
       </div>
 
-      {/* Create form */}
+      {/* 作成フォーム */}
       {createMode && (
-        <div className="rounded-lg p-5 mb-4 bg-card border border-[color:var(--color-primary)]">
+        <div className="rounded-lg p-5 bg-card border border-[color:var(--color-primary)]">
           <div className="space-y-3">
             <Input
               value={form.title}
@@ -207,13 +206,19 @@ function LayersContent() {
         </div>
       )}
 
-      {/* Layer list */}
+      {/* レイヤーリスト */}
       {loading ? (
         <div className="text-sm text-center py-8 text-muted-foreground">読み込み中...</div>
       ) : layers.length === 0 && !createMode ? (
-        <div className="rounded-lg px-5 py-10 text-center bg-card border border-border">
-          <p className="text-sm text-muted-foreground">ドキュメントがありません</p>
-        </div>
+        <EmptyState
+          icon={<Layers className="w-5 h-5" />}
+          title="ドキュメントがありません"
+          description={`${config.label}のドキュメントを追加しましょう`}
+          action={{
+            label: '新規ドキュメントを作成',
+            onClick: () => { setCreateMode(true); setForm({ title: '', content: '', cover_until: undefined }) },
+          }}
+        />
       ) : (
         <div className="space-y-3">
           {layers.map((layer) => {

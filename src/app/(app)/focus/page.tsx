@@ -8,8 +8,11 @@ import {
 import type { Task } from '@/types/database'
 import { getWeekStart, formatWeekLabel } from '@/lib/date'
 import { StatusDot } from '@/components/ui/status-dot'
-import { Input, Dialog, DialogContent, DialogHeader, DialogTitle } from '@takaki/go-design-system'
-import { Plus, X, CheckCircle2, Circle, ChevronRight } from 'lucide-react'
+import {
+  Button, Input, PageHeader, EmptyState,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@takaki/go-design-system'
+import { Plus, X, CheckCircle2, Circle, ChevronRight, Target } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -96,15 +99,11 @@ export default function FocusPage() {
   )
 
   return (
-    <div className="px-8 py-8 max-w-3xl">
-      {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold">フォーカス管理</h2>
-        <p className="text-xs mt-1 text-muted-foreground">週ごとに集中するタスクを管理する</p>
-      </div>
+    <div className="px-8 py-8 max-w-3xl space-y-6">
+      <PageHeader title="フォーカス管理" description="週ごとに集中するタスクを管理する" />
 
-      {/* Week tabs */}
-      <div className="flex items-center gap-1 mb-6 border-b border-border">
+      {/* 週タブ */}
+      <div className="flex items-center gap-1 border-b border-border">
         {WEEK_OFFSETS.map((offset) => {
           const count = (focusByWeek[offset] ?? []).length
           const doneCount = (focusByWeek[offset] ?? []).filter((wf) => wf.is_done).length
@@ -129,21 +128,23 @@ export default function FocusPage() {
         })}
       </div>
 
-      {/* Focus list */}
-      <div className="rounded-lg overflow-hidden border border-border bg-card mb-4">
+      {/* フォーカスリスト */}
+      <div className="rounded-lg overflow-hidden border border-border bg-card">
         {isLoading ? (
           <div className="px-5 py-8 text-center text-sm text-muted-foreground">読み込み中...</div>
         ) : currentFocus.length === 0 ? (
-          <div className="px-5 py-8 text-center">
-            <p className="text-sm text-muted-foreground">{formatWeekLabel(activeTab)}のフォーカスタスクがありません</p>
-          </div>
+          <EmptyState
+            icon={<Target className="w-5 h-5" />}
+            title={`${formatWeekLabel(activeTab)}のフォーカスタスクがありません`}
+            description="最大5件までタスクを追加できます"
+          />
         ) : (
           currentFocus.map((wfTask, i) => (
             <div
               key={wfTask.id}
               className={`flex items-center gap-3 px-4 py-3.5 group ${i < currentFocus.length - 1 ? 'border-b border-border' : ''}`}
             >
-              <button onClick={() => handleToggleDone(wfTask)} className="flex-shrink-0 transition-colors text-muted-foreground">
+              <button onClick={() => handleToggleDone(wfTask)} className="shrink-0 transition-colors text-muted-foreground">
                 {wfTask.is_done
                   ? <CheckCircle2 className="text-success w-4 h-4" />
                   : <Circle className="w-4 h-4" />
@@ -159,7 +160,7 @@ export default function FocusPage() {
               <StatusDot
                 variant={wfTask.task.status === 'done' ? 'green' : wfTask.task.status === 'in_progress' ? 'blue' : 'gray'}
                 label={wfTask.task.status === 'done' ? '完了' : wfTask.task.status === 'in_progress' ? '進行中' : '未着手'}
-                className="flex-shrink-0"
+                className="shrink-0"
               />
 
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -175,18 +176,15 @@ export default function FocusPage() {
         )}
       </div>
 
-      {/* Add button */}
+      {/* 追加ボタン */}
       {currentFocus.length < 5 && (
-        <button
-          onClick={openAddDialog}
-          className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors border-border text-muted-foreground hover:border-[color:var(--color-primary)] hover:text-primary"
-        >
+        <Button variant="outline" onClick={openAddDialog} className="gap-2">
           <Plus className="w-3 h-3" />
           タスクを追加（{currentFocus.length}/5）
-        </button>
+        </Button>
       )}
 
-      {/* Add task dialog */}
+      {/* タスク追加ダイアログ */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -213,7 +211,7 @@ export default function FocusPage() {
                     disabled={adding}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-left transition-colors hover:bg-accent disabled:opacity-50"
                   >
-                    <StatusDot variant={task.status === 'in_progress' ? 'blue' : 'gray'} className="flex-shrink-0" />
+                    <StatusDot variant={task.status === 'in_progress' ? 'blue' : 'gray'} className="shrink-0" />
                     <span className="text-sm truncate flex-1">{task.title}</span>
                   </button>
                 ))

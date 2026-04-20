@@ -11,10 +11,10 @@ import { StatusDot } from '@/components/ui/status-dot'
 import { TagBadge } from '@/components/ui/tag-badge'
 import { OutputModal } from '@/components/ui/output-modal'
 import { DatePicker } from '@/components/ui/date-picker'
-import { ArrowLeft, Sparkles, BookOpen, Clock, Tag as TagIcon, X, AlertTriangle, Plus } from 'lucide-react'
+import { Sparkles, BookOpen, Clock, Tag as TagIcon, X, AlertTriangle, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import {
-  Button, Input, Textarea,
+  Button, Input, Textarea, PageHeader,
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@takaki/go-design-system'
 import { LAYER_LABELS, LAYER_ORDER, STATUS_LABEL, STATUS_DOT } from '@/lib/constants'
@@ -263,29 +263,23 @@ export default function TaskDetailPage() {
   const isIssuetask = isIssueDiscoveryTask(task.title)
 
   return (
-    <div className="px-8 py-8 max-w-3xl">
-      {/* Back */}
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-1.5 text-sm mb-6 text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft style={{ width: 13, height: 13 }} />
-        タスク一覧に戻る
-      </button>
+    <div className="px-8 py-8 max-w-3xl space-y-6">
+      <PageHeader
+        title={task.title}
+        breadcrumbs={[{ label: 'タスク', href: '/tasks' }, { label: task.title }]}
+      />
 
       {/* Task info */}
-      <div className="rounded-lg p-6 mb-6 bg-card border border-border">
+      <div className="rounded-lg p-6 bg-card border border-border">
         <div className="flex items-start justify-between mb-4">
           {editMode ? (
             <Input
               value={editForm.title}
               onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-              className="text-base font-medium flex-1 mr-4"
+              className="flex-1 mr-4"
             />
-          ) : (
-            <h2 className="text-base font-medium flex-1 text-foreground">{task.title}</h2>
-          )}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          ) : <div />}
+          <div className="flex items-center gap-2 shrink-0">
             <StatusDot variant={STATUS_DOT[task.status]} label={STATUS_LABEL[task.status]} />
             {editMode ? (
               <>
@@ -459,7 +453,7 @@ export default function TaskDetailPage() {
 
       {/* Issue Discovery AI (for recurring issue tasks) */}
       {isIssuetask && (
-        <div className="rounded-lg p-5 mb-6 bg-card border border-border">
+        <div className="rounded-lg p-5 bg-card border border-border">
           <h3 className="text-sm font-medium mb-3 flex items-center gap-2 text-muted-foreground">
             <AlertTriangle className="text-warning" style={{ width: 12, height: 12 }} />
             課題発見AI
@@ -483,7 +477,7 @@ export default function TaskDetailPage() {
 
       {/* AI buttons (non-issue tasks) */}
       {!isIssuetask && (
-        <div className="rounded-lg p-5 mb-6 bg-card border border-border">
+        <div className="rounded-lg p-5 bg-card border border-border">
           <h3 className="text-sm font-medium mb-4 flex items-center gap-2 text-muted-foreground">
             <Sparkles className="text-primary" style={{ width: 12, height: 12 }} />
             AIサジェスト
