@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,38 +8,51 @@ import {
   DialogTitle,
   Textarea,
   Button,
-} from '@takaki/go-design-system'
-import { CheckCircle2 } from 'lucide-react'
+} from "@takaki/go-design-system";
+import { CheckCircle2 } from "lucide-react";
 
 interface OutputModalProps {
-  open: boolean
-  taskTitle: string
-  onSave: (outputNote: string) => Promise<void>
-  onSkip: () => void
+  open: boolean;
+  taskTitle: string;
+  onSave: (outputNote: string) => Promise<void>;
+  onSkip: () => void;
 }
 
-export function OutputModal({ open, taskTitle, onSave, onSkip }: OutputModalProps) {
-  const [note, setNote] = useState('')
-  const [saving, setSaving] = useState(false)
+export function OutputModal({
+  open,
+  taskTitle,
+  onSave,
+  onSkip,
+}: OutputModalProps) {
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!note.trim()) { onSkip(); return }
-    setSaving(true)
-    try {
-      await onSave(note.trim())
-      setNote('')
-    } finally {
-      setSaving(false)
+    if (!note.trim()) {
+      onSkip();
+      return;
     }
-  }
+    setSaving(true);
+    try {
+      await onSave(note.trim());
+      setNote("");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSkip = () => {
-    setNote('')
-    onSkip()
-  }
+    setNote("");
+    onSkip();
+  };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) handleSkip() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) handleSkip();
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
@@ -49,7 +62,9 @@ export function OutputModal({ open, taskTitle, onSave, onSkip }: OutputModalProp
         </DialogHeader>
 
         <div className="mt-1">
-          <p className="text-sm text-muted-foreground mb-1 truncate">「{taskTitle}」</p>
+          <p className="text-sm text-muted-foreground mb-1 truncate">
+            「{taskTitle}」
+          </p>
           <p className="text-sm font-medium mb-4">
             このタスクで出したアウトプット・バリューを一言で記録しましょう
           </p>
@@ -62,7 +77,7 @@ export function OutputModal({ open, taskTitle, onSave, onSkip }: OutputModalProp
             rows={3}
             autoFocus
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSave()
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSave();
             }}
           />
 
@@ -71,11 +86,11 @@ export function OutputModal({ open, taskTitle, onSave, onSkip }: OutputModalProp
               スキップ
             </Button>
             <Button onClick={handleSave} disabled={saving || !note.trim()}>
-              {saving ? '保存中...' : '記録する'}
+              {saving ? "保存中..." : "記録する"}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

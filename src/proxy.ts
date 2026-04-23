@@ -1,13 +1,16 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   // 環境変数が未設定の場合はスキップ
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return NextResponse.next({ request })
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return NextResponse.next({ request });
   }
 
-  let supabaseResponse = NextResponse.next({ request })
+  let supabaseResponse = NextResponse.next({ request });
 
   try {
     const supabase = createServerClient(
@@ -16,47 +19,47 @@ export async function proxy(request: NextRequest) {
       {
         cookies: {
           getAll() {
-            return request.cookies.getAll()
+            return request.cookies.getAll();
           },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value)
-            )
-            supabaseResponse = NextResponse.next({ request })
+              request.cookies.set(name, value),
+            );
+            supabaseResponse = NextResponse.next({ request });
             cookiesToSet.forEach(({ name, value, options }) =>
-              supabaseResponse.cookies.set(name, value, options)
-            )
+              supabaseResponse.cookies.set(name, value, options),
+            );
           },
         },
-      }
-    )
+      },
+    );
 
     const {
       data: { user },
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
-    const { pathname } = request.nextUrl
+    const { pathname } = request.nextUrl;
 
-    if (!user && pathname !== '/login') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
+    if (!user && pathname !== "/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
     }
 
-    if (user && pathname === '/login') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/'
-      return NextResponse.redirect(url)
+    if (user && pathname === "/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
     }
   } catch (e) {
-    console.error('[proxy] error:', e)
+    console.error("[proxy] error:", e);
     // エラーでもリクエストは通す
   }
 
-  return supabaseResponse
+  return supabaseResponse;
 }
 
 export const config = {
   // auth/callback はOAuthコールバック処理のため除外
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|auth/callback).*)'],
-}
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|auth/callback).*)"],
+};

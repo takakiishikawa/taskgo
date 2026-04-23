@@ -1,29 +1,31 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { DesignTokens, AppLayout, Toaster } from '@takaki/go-design-system'
-import { TaskGoSidebar } from '@/components/layout/sidebar'
-import { DarkModeInit } from '@/components/ui/dark-mode-init'
-import { createClient } from '@/lib/supabase/server'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { DesignTokens, AppLayout, Toaster } from "@takaki/go-design-system";
+import { TaskGoSidebar } from "@/components/layout/sidebar";
+import { DarkModeInit } from "@/components/ui/dark-mode-init";
+import { createClient } from "@/lib/supabase/server";
 
 const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
-  display: 'swap',
-})
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: 'TaskGo',
-  description: 'PdMの設計貯金を守るツール',
-}
+  title: "TaskGo",
+  description: "PdMの設計貯金を守るツール",
+};
 
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <html
@@ -46,5 +48,5 @@ export default async function RootLayout({
         <Toaster position="bottom-right" />
       </body>
     </html>
-  )
+  );
 }
