@@ -298,12 +298,13 @@ export default function TasksPage() {
           <div className="flex items-center gap-1.5 flex-wrap">
             <TagIcon className="w-3 h-3 text-muted-foreground" />
             {allTags.map((tag) => (
-              <button
+              <Button
                 key={tag.id}
                 onClick={() =>
                   setTagFilter(tagFilter === tag.name ? null : tag.name)
                 }
-                className="text-xs px-2 py-0.5 rounded-full transition-opacity"
+                variant="ghost"
+                className="text-xs px-2 py-0.5 rounded-full transition-opacity h-auto"
                 style={{
                   opacity: tagFilter && tagFilter !== tag.name ? 0.4 : 1,
                   outline:
@@ -312,16 +313,17 @@ export default function TasksPage() {
                 }}
               >
                 <TagBadge name={tag.name} size="xs" />
-              </button>
+              </Button>
             ))}
             {tagFilter && (
-              <button
+              <Button
                 onClick={() => setTagFilter(null)}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                variant="ghost"
+                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors h-auto px-2 py-0.5"
               >
                 <X className="w-2.5 h-2.5" />
                 クリア
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -483,9 +485,10 @@ function TaskRow({
     <div
       className={`flex items-center gap-3 px-4 py-3 group ${isLast ? "" : "border-b border-border"}`}
     >
-      <button
+      <Button
         onClick={() => onToggleFocus(task)}
-        className="shrink-0 transition-colors"
+        variant="ghost"
+        className="shrink-0 transition-colors p-0 h-auto hover:bg-transparent"
         title={task.is_focus ? "フォーカスから外す" : "フォーカスに追加"}
       >
         <Star
@@ -496,7 +499,7 @@ function TaskRow({
             fill: task.is_focus ? "currentColor" : "none",
           }}
         />
-      </button>
+      </Button>
 
       <Link href={`/tasks/${task.id}`} className="flex-1 min-w-0">
         <span
@@ -522,7 +525,7 @@ function TaskRow({
       <div className="shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="focus:outline-none">
+            <Button variant="ghost" className="focus:outline-none p-0 h-auto hover:bg-transparent">
               <Badge
                 variant={STATUS_BADGE_VARIANT[task.status]}
                 className={cn(
@@ -532,7 +535,7 @@ function TaskRow({
               >
                 {STATUS_LABEL[task.status]}
               </Badge>
-            </button>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {(["pending", "in_progress", "done"] as TaskStatus[]).map((s) => (
@@ -553,9 +556,9 @@ function TaskRow({
         </Link>
         <ConfirmDialog
           trigger={
-            <button className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors">
+            <Button variant="ghost" className="p-1 h-auto rounded text-muted-foreground hover:text-destructive transition-colors hover:bg-transparent">
               <Trash2 className="w-3 h-3" />
-            </button>
+            </Button>
           }
           title={`"${task.title}" を削除しますか？`}
           description="この操作は取り消せません。"

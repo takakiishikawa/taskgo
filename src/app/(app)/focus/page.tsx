@@ -144,8 +144,9 @@ export default function FocusPage() {
           const isActive = activeTab === offset;
           const allDone = count > 0 && doneCount === count;
           return (
-            <button
+            <Button
               key={offset}
+              variant="ghost"
               onClick={() => setActiveTab(offset)}
               className={`relative flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2 ${
                 isActive
@@ -161,7 +162,7 @@ export default function FocusPage() {
                   {doneCount}/{count}
                 </span>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -184,16 +185,17 @@ export default function FocusPage() {
               key={wfTask.id}
               className={`flex items-center gap-3 px-4 py-3.5 group ${i < currentFocus.length - 1 ? "border-b border-border" : ""}`}
             >
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => handleToggleDone(wfTask)}
-                className="shrink-0 transition-colors text-muted-foreground"
+                className="shrink-0 transition-colors text-muted-foreground p-0 h-auto"
               >
                 {wfTask.is_done ? (
                   <CheckCircle2 className="text-success w-4 h-4" />
                 ) : (
                   <Circle className="w-4 h-4" />
                 )}
-              </button>
+              </Button>
 
               <Link
                 href={`/tasks/${wfTask.task_id}`}
@@ -231,12 +233,13 @@ export default function FocusPage() {
                 >
                   <ChevronRight className="w-3 h-3" />
                 </Link>
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => handleRemove(wfTask.id)}
-                  className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"
+                  className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors h-auto"
                 >
                   <X className="w-3 h-3" />
-                </button>
+                </Button>
               </div>
             </div>
           ))
@@ -276,11 +279,12 @@ export default function FocusPage() {
                 </p>
               ) : (
                 filteredTasks.map((task) => (
-                  <button
+                  <Button
                     key={task.id}
+                    variant="ghost"
                     onClick={() => !adding && handleAddTask(task)}
                     disabled={adding}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-left transition-colors hover:bg-accent disabled:opacity-50"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-left transition-colors hover:bg-accent disabled:opacity-50 justify-start"
                   >
                     <StatusDot
                       variant={task.status === "in_progress" ? "blue" : "gray"}
@@ -289,7 +293,7 @@ export default function FocusPage() {
                     <span className="text-sm truncate flex-1">
                       {task.title}
                     </span>
-                  </button>
+                  </Button>
                 ))
               )}
             </div>

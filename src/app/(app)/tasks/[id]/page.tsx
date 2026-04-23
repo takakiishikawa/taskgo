@@ -534,24 +534,28 @@ export default function TaskDetailPage() {
                   ))}
               </datalist>
               {tagInput && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleAddTag(tagInput)}
                   className="p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Plus style={{ width: 12, height: 12 }} />
-                </button>
+                </Button>
               )}
             </div>
 
             {/* AI suggest tags */}
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleSuggestTags}
               disabled={tagSuggesting}
               className="flex items-center gap-1 text-sm px-2 py-0.5 rounded transition-colors disabled:opacity-50 text-primary border border-[color:var(--color-primary)]/30 bg-transparent hover:bg-[color:var(--color-primary)]/10"
             >
               <Sparkles style={{ width: 10, height: 10 }} />
               {tagSuggesting ? "提案中..." : "AI提案"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -571,14 +575,16 @@ export default function TaskDetailPage() {
               ? "現在の進行中タスクを分析し、今すぐ対処すべき重要な課題をトップ3で発見します。"
               : "3〜12ヶ月のスパンで見た時に対処すべき重要な課題をトップ3で発見します。"}
           </p>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleIssueDiscovery}
             disabled={aiLoading !== null}
             className="flex items-center gap-2 text-sm px-4 py-2.5 rounded transition-colors disabled:opacity-50 bg-warning-subtle text-warning border border-[color:var(--color-warning)]/30 hover:bg-[color:var(--color-warning)]/20"
           >
             <Sparkles style={{ width: 12, height: 12 }} />
             {aiLoading === "issues" ? "分析中..." : "課題を発見する"}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -593,7 +599,9 @@ export default function TaskDetailPage() {
             AIサジェスト
           </h3>
           <div className="flex gap-3">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handleAiSuggest("first_step")}
               disabled={aiLoading !== null}
               className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors disabled:opacity-50 border-[color:var(--color-primary)] text-primary bg-transparent hover:bg-[color:var(--color-primary)]/10"
@@ -602,9 +610,11 @@ export default function TaskDetailPage() {
               {aiLoading === "first_step"
                 ? "提案中..."
                 : "次の一手を提案してもらう"}
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handleAiSuggest("research")}
               disabled={aiLoading !== null}
               className="flex items-center gap-2 text-sm px-4 py-2.5 rounded border transition-colors disabled:opacity-50 border-border text-muted-foreground hover:border-ring hover:text-foreground bg-transparent"
@@ -613,7 +623,7 @@ export default function TaskDetailPage() {
               {aiLoading === "research"
                 ? "提案中..."
                 : "リサーチを手伝ってもらう"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
