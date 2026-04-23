@@ -327,19 +327,22 @@ function LayersContent() {
                       className="resize-none"
                     />
                     <div className="flex justify-end gap-2">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setEditingId(null)}
                         className="p-1.5 rounded text-muted-foreground hover:text-foreground"
                       >
                         <X className="w-3.5 h-3.5" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        size="icon"
                         onClick={() => handleEdit(layer)}
                         disabled={!form.title.trim() || saving}
-                        className="p-1.5 rounded disabled:opacity-50 bg-primary text-primary-foreground hover:opacity-90"
+                        className="p-1.5 rounded disabled:opacity-50"
                       >
                         <Check className="w-3.5 h-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -352,17 +355,23 @@ function LayersContent() {
                         </Badge>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => startEdit(layer)}
                           className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
                         >
                           <Pencil className="w-3 h-3" />
-                        </button>
+                        </Button>
                         <ConfirmDialog
                           trigger={
-                            <button className="p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors"
+                            >
                               <Trash2 className="w-3 h-3" />
-                            </button>
+                            </Button>
                           }
                           title={`"${layer.title}" を削除しますか？`}
                           description="この操作は取り消せません。"

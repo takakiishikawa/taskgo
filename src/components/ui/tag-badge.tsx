@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@takaki/go-design-system";
 
 /** タグ名の文字列ハッシュから一意のカラーペアを生成 */
 export function getTagColor(name: string): { bg: string; text: string } {
@@ -9,14 +10,14 @@ export function getTagColor(name: string): { bg: string; text: string } {
     hash |= 0;
   }
   const palette = [
-    { bg: "rgba(94,106,210,0.15)", text: "#7B87E3" },
-    { bg: "rgba(48,164,108,0.15)", text: "#3DB87A" },
-    { bg: "rgba(245,166,35,0.15)", text: "#D97706" },
-    { bg: "rgba(20,184,166,0.15)", text: "#14B8A6" },
-    { bg: "rgba(168,85,247,0.15)", text: "#A855F7" },
-    { bg: "rgba(249,115,22,0.15)", text: "#F97316" },
-    { bg: "rgba(236,72,153,0.15)", text: "#EC4899" },
-    { bg: "rgba(14,165,233,0.15)", text: "#0EA5E9" },
+    { bg: "rgba(94,106,210,0.15)", text: "var(--color-primary)" },
+    { bg: "rgba(48,164,108,0.15)", text: "var(--color-success)" },
+    { bg: "rgba(245,166,35,0.15)", text: "var(--color-warning)" },
+    { bg: "rgba(20,184,166,0.15)", text: "var(--color-info)" },
+    { bg: "rgba(168,85,247,0.15)", text: "var(--color-purple)" },
+    { bg: "rgba(249,115,22,0.15)", text: "var(--color-orange)" },
+    { bg: "rgba(236,72,153,0.15)", text: "var(--color-pink)" },
+    { bg: "rgba(14,165,233,0.15)", text: "var(--color-blue)" },
   ];
   return palette[Math.abs(hash) % palette.length];
 }
@@ -46,7 +47,7 @@ export function TagBadge({
     >
       {name}
       {onRemove && (
-        <button
+        <Button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
@@ -55,7 +56,7 @@ export function TagBadge({
           className="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"
         >
           <X className="w-2.5 h-2.5" />
-        </button>
+        </Button>
       )}
     </span>
   );

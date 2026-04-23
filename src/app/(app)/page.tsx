@@ -402,19 +402,21 @@ export default function DashboardPage() {
                 key={wfTask.id}
                 className={`flex items-center gap-3 px-5 py-3.5 ${i < weeklyFocusTasks.length - 1 ? "border-b border-border" : ""}`}
               >
-                <button
+                <Button
                   onClick={() =>
                     !wfTask.is_done && handleCompleteTask(wfTask.task)
                   }
                   className="shrink-0 text-muted-foreground hover:text-success transition-colors"
                   disabled={wfTask.is_done}
+                  variant="ghost"
+                  size="sm"
                 >
                   {wfTask.is_done ? (
                     <CheckCircle2 className="w-4 h-4 text-success" />
                   ) : (
                     <Circle className="w-4 h-4" />
                   )}
-                </button>
+                </Button>
                 <Link
                   href={`/tasks/${wfTask.task_id}`}
                   className="flex-1 min-w-0"
@@ -458,16 +460,18 @@ export default function DashboardPage() {
       <Section
         title="今週のサマリー"
         actions={
-          <button
+          <Button
             onClick={handleGenerateSummary}
             disabled={summaryLoading}
+            variant="ghost"
+            size="sm"
             className="text-sm flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
           >
             <RefreshCw
               className={`w-3 h-3 ${summaryLoading ? "animate-spin" : ""}`}
             />
             {weeklySummary ? "再生成" : "生成する"}
-          </button>
+          </Button>
         }
       >
         <div className="rounded-lg p-5 bg-card border border-border">
@@ -498,16 +502,18 @@ export default function DashboardPage() {
         <Section
           title="AIサジェスト"
           actions={
-            <button
+            <Button
               onClick={handleFetchAiSuggestion}
               disabled={loadingAi}
+              variant="ghost"
+              size="sm"
               className="text-sm flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
             >
               <RefreshCw
                 className={`w-3 h-3 ${loadingAi ? "animate-spin" : ""}`}
               />
               再取得
-            </button>
+            </Button>
           }
         >
           <div className="rounded-lg p-5 bg-card border border-border">
