@@ -30,7 +30,7 @@ import {
   ChevronRight,
   Target,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@takaki/go-design-system";
 import Link from "next/link";
 
 const WEEK_OFFSETS = [0, 1, 2, 3, 4];

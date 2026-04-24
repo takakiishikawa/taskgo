@@ -40,7 +40,7 @@ import {
   FileText,
   Target,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@takaki/go-design-system";
 
 type HealthStatus = "green" | "yellow" | "red";
 

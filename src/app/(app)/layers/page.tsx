@@ -23,7 +23,7 @@ import {
 } from "@takaki/go-design-system";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Plus, Pencil, Trash2, Check, X, Layers } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@takaki/go-design-system";
 import { Suspense } from "react";
 
 type TabType = "core_value" | "roadmap" | "spec_design";

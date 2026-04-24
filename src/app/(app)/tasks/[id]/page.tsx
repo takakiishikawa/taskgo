@@ -31,7 +31,7 @@ import {
   AlertTriangle,
   Plus,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@takaki/go-design-system";
 import {
   Button,
   Input,

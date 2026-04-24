@@ -49,7 +49,7 @@ import {
   Tag as TagIcon,
   X,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@takaki/go-design-system";
 import type { LayerType } from "@/types/database";
 import { cn } from "@/lib/utils";
 
