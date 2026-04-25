@@ -564,10 +564,7 @@ export default function TaskDetailPage() {
       {isIssuetask && (
         <div className="rounded-lg p-5 bg-card border border-border">
           <h3 className="text-sm font-medium mb-3 flex items-center gap-2 text-muted-foreground">
-            <AlertTriangle
-              className="text-warning"
-              className="size-3"
-            />
+            <AlertTriangle className="text-warning" className="size-3" />
             課題発見AI
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
@@ -592,10 +589,7 @@ export default function TaskDetailPage() {
       {!isIssuetask && (
         <div className="rounded-lg p-5 bg-card border border-border">
           <h3 className="text-sm font-medium mb-4 flex items-center gap-2 text-muted-foreground">
-            <Sparkles
-              className="text-primary"
-              className="size-3"
-            />
+            <Sparkles className="text-primary" className="size-3" />
             AIサジェスト
           </h3>
           <div className="flex gap-3">
